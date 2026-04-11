@@ -4,6 +4,7 @@ import { Check, X, Zap, Building2, Rocket, Tag } from "lucide-react";
 import { SectionWrapper } from "@/components/ui-custom/SectionWrapper";
 import { GlassCard } from "@/components/ui-custom/GlassCard";
 import { GradientButton } from "@/components/ui-custom/GradientButton";
+import { EnterprisePageHero } from "@/components/sections/EnterprisePageHero";
 
 const plans = [
   {
@@ -128,55 +129,39 @@ export default function Pricing() {
   return (
     <div className="pt-24 min-h-[100dvh] bg-[#070B14]">
       <SectionWrapper withGlow>
-        <div className="text-center max-w-3xl mx-auto mb-12">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 mb-6 text-sm font-medium text-purple-400">
-              Simple Pricing
-            </div>
-            <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 font-heading">
-              Invest in{" "}
-              <span
-                style={{
-                  background: "linear-gradient(135deg, #06B6D4, #8B5CF6, #EC4899)",
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
-                  backgroundClip: "text",
-                }}
-              >
-                your growth
-              </span>
-            </h1>
-            <p className="text-xl text-gray-400 mb-8">
-              Transparent pricing designed for Nepal's businesses — from street shops to national chains.
-            </p>
+        <EnterprisePageHero
+          badge="Simple Pricing"
+          title="Invest in"
+          highlight="your growth"
+          description="Transparent pricing designed for Nepal's businesses — from street shops to national chains."
+          primaryCta={{ label: "Book Demo", href: "/book-demo" }}
+          secondaryCta={{ label: "Explore Product", href: "/product" }}
+          className="mb-10"
+        />
 
-            {/* Billing toggle */}
-            <div className="inline-flex items-center gap-4 p-1.5 rounded-xl bg-white/5 border border-white/10 mb-2">
-              <button
-                onClick={() => setYearly(false)}
-                className={`px-5 py-2 rounded-lg text-sm font-medium transition-all ${
-                  !yearly ? "bg-white/10 text-white shadow" : "text-gray-400 hover:text-gray-300"
-                }`}
-              >
-                Monthly
-              </button>
-              <button
-                onClick={() => setYearly(true)}
-                className={`px-5 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${
-                  yearly ? "bg-white/10 text-white shadow" : "text-gray-400 hover:text-gray-300"
-                }`}
-              >
-                Yearly
-                <span className="px-2 py-0.5 rounded-full bg-green-500/20 text-green-400 text-xs font-semibold flex items-center gap-1">
-                  <Tag className="w-3 h-3" /> Save 20%
-                </span>
-              </button>
-            </div>
-          </motion.div>
+        {/* Billing toggle */}
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center gap-4 p-1.5 rounded-xl bg-white/5 border border-white/10 mb-2">
+            <button
+              onClick={() => setYearly(false)}
+              className={`px-5 py-2 rounded-lg text-sm font-medium transition-all ${
+                !yearly ? "bg-white/10 text-white shadow" : "text-gray-400 hover:text-gray-300"
+              }`}
+            >
+              Monthly
+            </button>
+            <button
+              onClick={() => setYearly(true)}
+              className={`px-5 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${
+                yearly ? "bg-white/10 text-white shadow" : "text-gray-400 hover:text-gray-300"
+              }`}
+            >
+              Yearly
+              <span className="px-2 py-0.5 rounded-full bg-green-500/20 text-green-400 text-xs font-semibold flex items-center gap-1">
+                <Tag className="w-3 h-3" /> Save 20%
+              </span>
+            </button>
+          </div>
         </div>
 
         <div className="grid md:grid-cols-3 gap-8 mb-24">

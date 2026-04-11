@@ -3,6 +3,7 @@ import { ShoppingBag, Coffee, Shirt, Cpu, ShoppingCart, Pill, Utensils, Bike } f
 import { SectionWrapper } from "@/components/ui-custom/SectionWrapper";
 import { GlassCard } from "@/components/ui-custom/GlassCard";
 import { GradientButton } from "@/components/ui-custom/GradientButton";
+import { EnterprisePageHero } from "@/components/sections/EnterprisePageHero";
 
 const industries = [
   {
@@ -75,22 +76,14 @@ export default function Solutions() {
   return (
     <div className="pt-24 min-h-[100dvh] bg-[#070B14]">
       <SectionWrapper withGlow>
-        <div className="text-center max-w-3xl mx-auto mb-16">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 mb-6 text-sm font-medium text-cyan-400">
-              Solutions by Industry
-            </div>
-            <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 font-heading">
-              Built for{" "}
-              <span className="bg-gradient-to-r from-[#06B6D4] to-[#EC4899] bg-clip-text text-transparent">
-                your industry
-              </span>
-            </h1>
-            <p className="text-xl text-gray-400">
-              NEPALIX isn't generic software — it's tailored for how Nepali businesses actually operate.
-            </p>
-          </motion.div>
-        </div>
+        <EnterprisePageHero
+          badge="Solutions by Industry"
+          title="Built for"
+          highlight="your industry"
+          description="NEPALIX isn't generic software — it's tailored for how Nepali businesses actually operate."
+          primaryCta={{ label: "Book Demo", href: "/book-demo" }}
+          secondaryCta={{ label: "Explore Product", href: "/product" }}
+        />
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-24">
           {industries.map((ind, i) => {

@@ -7,6 +7,7 @@ import {
 import { SectionWrapper } from "@/components/ui-custom/SectionWrapper";
 import { GlassCard } from "@/components/ui-custom/GlassCard";
 import { GradientButton } from "@/components/ui-custom/GradientButton";
+import { EnterprisePageHero } from "@/components/sections/EnterprisePageHero";
 
 const modules = [
   {
@@ -99,22 +100,14 @@ export default function Product() {
   return (
     <div className="pt-24 min-h-[100dvh] bg-[#070B14]">
       <SectionWrapper withGlow>
-        <div className="text-center max-w-3xl mx-auto mb-16">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 mb-6 text-sm font-medium text-cyan-400">
-              The Platform
-            </div>
-            <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 font-heading">
-              Every tool your{" "}
-              <span className="bg-gradient-to-r from-[#06B6D4] to-[#8B5CF6] bg-clip-text text-transparent">
-                business needs
-              </span>
-            </h1>
-            <p className="text-xl text-gray-400">
-              Five modules. One platform. Built for Nepal's fastest-growing businesses.
-            </p>
-          </motion.div>
-        </div>
+        <EnterprisePageHero
+          badge="The Platform"
+          title="Every tool your"
+          highlight="business needs"
+          description="Five modules. One platform. Built for Nepal's fastest-growing businesses."
+          primaryCta={{ label: "Book Demo", href: "/book-demo" }}
+          secondaryCta={{ label: "Start Free Trial", href: "/book-demo" }}
+        />
 
         <div className="flex flex-wrap justify-center gap-3 mb-16">
           {modules.map((m) => {

@@ -122,17 +122,17 @@ export function Navbar() {
           {/* Desktop CTA */}
           <div className="hidden lg:flex items-center gap-3">
             <Link
-              href="/contact"
+              href="/product"
               className="text-sm font-medium text-gray-300 hover:text-white transition-colors px-3 py-2"
             >
-              Sign In
+              Explore Product
             </Link>
             <Link
               href="/book-demo"
               className="px-5 py-2.5 rounded-lg text-white font-medium text-sm transition-all hover:shadow-[0_0_20px_rgba(6,182,212,0.4)] hover:-translate-y-px"
               style={{ background: "linear-gradient(135deg, #06B6D4, #3B82F6)" }}
             >
-              Start Free Trial
+              Book Demo
             </Link>
           </div>
 
@@ -193,15 +193,15 @@ export function Navbar() {
                 Docs
               </Link>
               <div className="h-px bg-white/10 my-4" />
-              <Link href="/contact" className="px-4 py-3 text-lg font-medium text-gray-300 hover:text-white rounded-xl hover:bg-white/5 transition-colors">
-                Sign In
+              <Link href="/product" className="px-4 py-3 text-lg font-medium text-gray-300 hover:text-white rounded-xl hover:bg-white/5 transition-colors">
+                Explore Product
               </Link>
               <Link
                 href="/book-demo"
                 className="mt-2 w-full py-4 rounded-xl text-white font-semibold text-center text-lg"
                 style={{ background: "linear-gradient(135deg, #06B6D4, #3B82F6)" }}
               >
-                Start Free Trial
+                Book Demo
               </Link>
             </nav>
           </motion.div>

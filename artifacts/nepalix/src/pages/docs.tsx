@@ -3,6 +3,7 @@ import { Search, BookOpen, Zap, Code, CreditCard, ShoppingCart, Package, BarChar
 import { SectionWrapper } from "@/components/ui-custom/SectionWrapper";
 import { GlassCard } from "@/components/ui-custom/GlassCard";
 import { GradientButton } from "@/components/ui-custom/GradientButton";
+import { EnterprisePageHero } from "@/components/sections/EnterprisePageHero";
 
 const categories = [
   { icon: Zap, title: "Getting Started", desc: "Set up your store in under an hour", color: "#06B6D4", articles: 8 },
@@ -26,29 +27,24 @@ export default function Docs() {
   return (
     <div className="pt-24 min-h-[100dvh] bg-[#070B14]">
       <SectionWrapper withGlow>
-        <div className="text-center max-w-3xl mx-auto mb-12">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 mb-6 text-sm font-medium text-cyan-400">
-              Documentation
-            </div>
-            <h1 className="text-5xl md:text-6xl font-bold text-white mb-6 font-heading">
-              Everything you need to{" "}
-              <span className="bg-gradient-to-r from-[#06B6D4] to-[#8B5CF6] bg-clip-text text-transparent">
-                build on NEPALIX
-              </span>
-            </h1>
-            <p className="text-xl text-gray-400 mb-8">
-              Guides, API references, tutorials, and examples — all written for real Nepali business contexts.
-            </p>
-            <div className="relative max-w-xl mx-auto">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-              <input
-                className="w-full pl-12 pr-4 py-4 rounded-2xl bg-white/5 border border-white/15 text-white placeholder-gray-500 text-base focus:outline-none focus:border-[#06B6D4]/60 transition-colors"
-                placeholder="Search docs — e.g. 'eSewa setup', 'POS terminal', 'bulk import'..."
-              />
-            </div>
-          </motion.div>
-        </div>
+        <EnterprisePageHero
+          badge="Documentation"
+          title="Everything you need to"
+          highlight="build on NEPALIX"
+          description="Guides, API references, tutorials, and examples — all written for real Nepali business contexts."
+          primaryCta={{ label: "Book Demo", href: "/book-demo" }}
+          secondaryCta={{ label: "Contact Support", href: "/contact" }}
+          className="mb-12"
+        />
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+          <div className="relative max-w-xl mx-auto mb-12">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <input
+              className="w-full pl-12 pr-4 py-4 rounded-2xl bg-white/5 border border-white/15 text-white placeholder-gray-500 text-base focus:outline-none focus:border-[#06B6D4]/60 transition-colors"
+              placeholder="Search docs — e.g. 'eSewa setup', 'POS terminal', 'bulk import'..."
+            />
+          </div>
+        </motion.div>
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
           {categories.map((cat, i) => {

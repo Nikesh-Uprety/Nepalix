@@ -118,6 +118,12 @@
   --app-font-serif: Georgia, serif;
   --app-font-mono: Menlo, monospace;
   --radius: .5rem;
+  --radius-2xl: 1rem;
+
+  --motion-enter: 450ms;
+  --motion-fast: 220ms;
+  --motion-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --motion-stagger: 80ms;
   
   --sidebar-background: 222 47% 11%;
   --sidebar-foreground: 220 14% 93%;
@@ -160,6 +166,13 @@
   body {
     @apply font-sans antialiased bg-background text-foreground selection:bg-primary/30;
   }
+  p {
+    max-width: 80ch;
+  }
+  :focus-visible {
+    outline: 2px solid rgb(6 182 212 / 0.65);
+    outline-offset: 2px;
+  }
   h1, h2, h3, h4, h5, h6 {
     @apply font-heading tracking-tight;
   }
@@ -177,5 +190,8 @@
   }
   .glass {
     @apply bg-[#0F172A]/60 backdrop-blur-xl border border-[rgba(148,163,184,0.18)];
+  }
+  .motion-enter {
+    transition: all var(--motion-enter) var(--motion-ease);
   }
 }
