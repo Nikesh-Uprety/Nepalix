@@ -1,0 +1,26 @@
+uploads = []
+outputs = []
+
+[[generated]]
+id = "3y9UEGB07VJ8auzrfnoro"
+uri = "file://artifacts/nepalix/public/hero-dashboard.png"
+type = "image"
+title = "dark theme commerce dashboard"
+
+[[generated]]
+id = "w9T6BsdAVYfSOM-1nMwdX"
+uri = "file://artifacts/nepalix/public/case-study-1.png"
+type = "image"
+title = "kathmandu coffee shop"
+
+[[generated]]
+id = "lrP4kRZIrOOHpsklnDoYN"
+uri = "file://artifacts/nepalix/public/case-study-2.png"
+type = "image"
+title = "nepali fashion boutique"
+
+[[generated]]
+id = "MdujuURZfLg6taf2Bv0OH"
+uri = "file://artifacts/nepalix/public/case-study-3.png"
+type = "image"
+title = "electronics store nepal"

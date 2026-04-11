@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "NEPALIX — Nepal-first SaaS Platform"
+version = "1.0.0"
+id = "artifacts/nepalix"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 22894
+
+[services.development]
+run = "pnpm --filter @workspace/nepalix run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/nepalix", "run", "build" ]
+publicDir = "artifacts/nepalix/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "22894"
+BASE_PATH = "/"

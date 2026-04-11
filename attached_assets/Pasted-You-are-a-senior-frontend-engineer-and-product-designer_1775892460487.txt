@@ -1,0 +1,122 @@
+You are a senior frontend engineer and product designer.
+
+Build a production-quality MVP marketing website for a Nepal-first SaaS platform called “NEPALIX”.
+This is a separate app from the existing ecommerce/storefront codebase.
+Goal: create a sleek, modern, colorful, conversion-focused SaaS website inspired by premium commerce platform sites.
+
+TECH STACK
+- Next.js 15 (App Router) + TypeScript
+- Tailwind CSS + shadcn/ui
+- Framer Motion for UI animations
+- React Three Fiber + Drei + GSAP ScrollTrigger for 3D scroll hero
+- Lucide icons
+- Zustand (only if minor global UI state needed)
+- No backend required for MVP; use mock JSON content
+
+PRIMARY OBJECTIVE
+Build a clickable prototype with complete pages and polished visual system.
+Focus on:
+1) visual quality,
+2) storytelling,
+3) smooth interactions,
+4) mobile responsiveness,
+5) conversion UX (Book Demo / Start Free Trial CTA).
+
+BRAND STYLE
+- Brand name: NEPALIX
+- Tone: innovative, confident, Nepal-first, enterprise-ready
+- Style: dark-modern + neon gradient accents + glassmorphism cards + subtle glow
+- Feel: premium, energetic, clean, technical, trustworthy
+
+COLOR SYSTEM
+Use this exact palette:
+- Background Base: #070B14
+- Surface 1: #0F172A
+- Surface 2: #111827
+- Primary Cyan: #06B6D4
+- Primary Blue: #3B82F6
+- Accent Purple: #8B5CF6
+- Accent Pink: #EC4899
+- Accent Lime: #84CC16
+- Text Primary: #E5E7EB
+- Text Secondary: #9CA3AF
+- Border: rgba(148,163,184,0.18)
+
+Create CSS variables in globals.css and Tailwind tokens for all colors.
+
+TYPOGRAPHY
+- Font: Inter for body, Sora for headings
+- Heading style: strong, wide spacing, modern SaaS rhythm
+
+PAGES TO BUILD
+1. Home
+2. Product
+3. Pricing
+4. Solutions
+5. Plugins
+6. Case Studies
+7. Compare (Nepalix vs alternatives)
+8. About
+9. Book Demo
+10. Contact
+11. Docs (prototype landing page)
+
+GLOBAL COMPONENTS
+- Sticky transparent navbar with blur + scroll state
+- Mega menu for Product/Solutions
+- Gradient CTA buttons
+- Reusable section wrapper
+- Testimonial cards
+- Logo cloud
+- FAQ accordion
+- Footer with columns + legal links
+
+HOME PAGE REQUIREMENTS
+- Hero with 3D scroll animation section using React Three Fiber:
+  - A floating 3D commerce dashboard/device stack
+  - Camera and object movement tied to scroll progress
+  - Smooth easing, high FPS, mobile fallback to static illustration
+- Value prop section (online + POS + inventory + payments)
+- Feature grid cards with icons
+- “How it works” 3-step section
+- Social proof/testimonials
+- CTA strip
+
+ANIMATION REQUIREMENTS
+- Use Framer Motion for reveal-on-scroll
+- Respect prefers-reduced-motion
+- 60fps target; avoid over-heavy post-processing
+- Add fallback for low-end devices
+- Use subtle parallax backgrounds, not distracting
+
+RESPONSIVENESS
+- Fully responsive (mobile-first)
+- Breakpoints: sm, md, lg, xl, 2xl
+- Ensure 3D section degrades gracefully on mobile
+
+SEO + PERFORMANCE
+- Metadata for each page
+- Open Graph tags
+- Semantic HTML and accessible headings
+- Lighthouse-friendly structure
+
+PROJECT STRUCTURE
+Create clear folders:
+- app/
+- components/
+- components/sections/
+- components/3d/
+- lib/
+- data/
+- public/
+- styles/
+
+DELIVERABLES
+- Functional Next.js app with all pages and navigation wired
+- High-fidelity prototype visuals
+- Dummy content but realistic SaaS copy
+- Clean reusable component architecture
+- README with run instructions and customization notes
+
+Start by scaffolding the app, installing dependencies, creating design tokens, and building the layout system.
+Then implement pages in this order: Home → Product → Pricing → Solutions → Book Demo → remaining pages.
