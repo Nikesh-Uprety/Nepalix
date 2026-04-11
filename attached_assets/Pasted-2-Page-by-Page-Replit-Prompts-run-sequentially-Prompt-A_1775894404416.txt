@@ -1,0 +1,57 @@
+2) Page-by-Page Replit Prompts (run sequentially)
+Prompt A — Foundation/UI system
+Set up the NEPALIX design system:
+- global color tokens
+- typography setup (Inter/Sora)
+- reusable components (button variants, cards, badges, section headings, CTA block)
+- navbar + footer
+- responsive container utilities
+- dark sleek theme with neon gradients
+Prompt B — Home + 3D scroll hero
+Build the Home page with a premium hero and 3D scroll animation:
+- React Three Fiber scene in components/3d/HeroScene.tsx
+- scroll-linked camera/object animation (GSAP ScrollTrigger)
+- fallback static hero on mobile or reduced motion
+- sections: value prop, features, how-it-works, testimonials, CTA
+- polished transitions with Framer Motion
+Prompt C — Product page
+Create Product page with modular sections:
+- Unified Commerce
+- POS & Retail
+- Inventory & Warehousing
+- Payments & Checkout
+- Analytics & Reporting
+- Automation
+Use comparison cards, animated tabs, and screenshots placeholders.
+Prompt D — Pricing page
+Build Pricing page with 3 tiers + Enterprise:
+- monthly/yearly toggle UI
+- feature comparison table
+- FAQ section
+- strong CTA blocks
+- highlight recommended plan
+Prompt E — Solutions + Plugins
+Build Solutions and Plugins pages:
+- solutions by business type (D2C, physical retail, enterprise)
+- plugin ecosystem cards
+- integration badges
+- callouts for Nepal-focused workflow
+Prompt F — Case Studies + Compare page
+Build Case Studies and Compare pages:
+- case study cards with KPI metrics
+- “Nepalix vs alternatives” matrix
+- trust and migration messaging
+- CTA to book demo
+Prompt G — Lead capture pages
+Build Book Demo and Contact pages:
+- polished form UI
+- form validation with zod/react-hook-form
+- success state modal/toast
+- no backend; mock submit handler
+Prompt H — Final polish
+Do a full QA polish pass:
+- improve spacing and consistency
+- optimize animations and accessibility
+- ensure all pages are responsive
+- add metadata and OG images
+- add loading skeletons where needed

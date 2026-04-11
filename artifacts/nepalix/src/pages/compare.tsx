@@ -1,4 +1,4 @@
-import React from "react";
+import { Fragment } from "react";
 import { motion } from "framer-motion";
 import { Check, X, Minus } from "lucide-react";
 import { SectionWrapper } from "@/components/ui-custom/SectionWrapper";
@@ -121,7 +121,7 @@ export default function Compare() {
             </thead>
             <tbody>
               {features.map((group) => (
-                <React.Fragment key={group.category}>
+                <Fragment key={group.category}>
                   <tr>
                     <td
                       colSpan={competitors.length + 1}
@@ -146,7 +146,7 @@ export default function Compare() {
                       ))}
                     </tr>
                   ))}
-                </React.Fragment>
+                </Fragment>
               ))}
             </tbody>
           </table>

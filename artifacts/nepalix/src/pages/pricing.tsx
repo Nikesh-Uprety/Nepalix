@@ -1,5 +1,6 @@
-import { motion } from "framer-motion";
-import { Check, X, Zap, Building2, Rocket } from "lucide-react";
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Check, X, Zap, Building2, Rocket, Tag } from "lucide-react";
 import { SectionWrapper } from "@/components/ui-custom/SectionWrapper";
 import { GlassCard } from "@/components/ui-custom/GlassCard";
 import { GradientButton } from "@/components/ui-custom/GradientButton";
@@ -8,8 +9,8 @@ const plans = [
   {
     name: "Starter",
     icon: Zap,
-    price: "NPR 999",
-    period: "/month",
+    monthlyPrice: 999,
+    yearlyPrice: 799,
     description: "Perfect for new businesses launching online in Nepal.",
     color: "#06B6D4",
     features: [
@@ -30,8 +31,8 @@ const plans = [
   {
     name: "Growth",
     icon: Rocket,
-    price: "NPR 3,999",
-    period: "/month",
+    monthlyPrice: 3999,
+    yearlyPrice: 3199,
     description: "For growing businesses ready to scale across Nepal.",
     color: "#8B5CF6",
     features: [
@@ -52,8 +53,8 @@ const plans = [
   {
     name: "Enterprise",
     icon: Building2,
-    price: "Custom",
-    period: "",
+    monthlyPrice: null,
+    yearlyPrice: null,
     description: "Full power for large enterprises and national chains.",
     color: "#EC4899",
     features: [
@@ -96,11 +97,38 @@ const faqs = [
   },
 ];
 
+function PriceDisplay({ plan, yearly }: { plan: typeof plans[0]; yearly: boolean }) {
+  const price = yearly ? plan.yearlyPrice : plan.monthlyPrice;
+  if (!price) {
+    return <span className="text-5xl font-extrabold text-white font-heading">Custom</span>;
+  }
+  return (
+    <AnimatePresence mode="wait">
+      <motion.div
+        key={yearly ? "yearly" : "monthly"}
+        initial={{ opacity: 0, y: -8 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: 8 }}
+        transition={{ duration: 0.2 }}
+        className="flex items-end gap-1"
+      >
+        <span className="text-5xl font-extrabold text-white font-heading">
+          NPR {price.toLocaleString()}
+        </span>
+        <span className="text-gray-400 pb-1">/mo</span>
+      </motion.div>
+    </AnimatePresence>
+  );
+}
+
 export default function Pricing() {
+  const [yearly, setYearly] = useState(false);
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
+
   return (
     <div className="pt-24 min-h-[100dvh] bg-[#070B14]">
       <SectionWrapper withGlow>
-        <div className="text-center max-w-3xl mx-auto mb-20">
+        <div className="text-center max-w-3xl mx-auto mb-12">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -111,13 +139,43 @@ export default function Pricing() {
             </div>
             <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 font-heading">
               Invest in{" "}
-              <span className="bg-gradient-to-r from-[#06B6D4] via-[#8B5CF6] to-[#EC4899] bg-clip-text text-transparent">
+              <span
+                style={{
+                  background: "linear-gradient(135deg, #06B6D4, #8B5CF6, #EC4899)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                  backgroundClip: "text",
+                }}
+              >
                 your growth
               </span>
             </h1>
-            <p className="text-xl text-gray-400">
+            <p className="text-xl text-gray-400 mb-8">
               Transparent pricing designed for Nepal's businesses — from street shops to national chains.
             </p>
+
+            {/* Billing toggle */}
+            <div className="inline-flex items-center gap-4 p-1.5 rounded-xl bg-white/5 border border-white/10 mb-2">
+              <button
+                onClick={() => setYearly(false)}
+                className={`px-5 py-2 rounded-lg text-sm font-medium transition-all ${
+                  !yearly ? "bg-white/10 text-white shadow" : "text-gray-400 hover:text-gray-300"
+                }`}
+              >
+                Monthly
+              </button>
+              <button
+                onClick={() => setYearly(true)}
+                className={`px-5 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${
+                  yearly ? "bg-white/10 text-white shadow" : "text-gray-400 hover:text-gray-300"
+                }`}
+              >
+                Yearly
+                <span className="px-2 py-0.5 rounded-full bg-green-500/20 text-green-400 text-xs font-semibold flex items-center gap-1">
+                  <Tag className="w-3 h-3" /> Save 20%
+                </span>
+              </button>
+            </div>
           </motion.div>
         </div>
 
@@ -137,7 +195,7 @@ export default function Pricing() {
                 }`}
               >
                 {plan.popular && (
-                  <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-gradient-to-r from-[#8B5CF6] to-[#06B6D4] text-white text-sm font-semibold">
+                  <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-gradient-to-r from-[#8B5CF6] to-[#06B6D4] text-white text-sm font-semibold whitespace-nowrap">
                     Most Popular
                   </div>
                 )}
@@ -151,10 +209,16 @@ export default function Pricing() {
                   <h3 className="text-2xl font-bold text-white font-heading">{plan.name}</h3>
                   <p className="text-gray-400 text-sm mt-1">{plan.description}</p>
                 </div>
-                <div className="mb-8">
-                  <span className="text-5xl font-extrabold text-white font-heading">{plan.price}</span>
-                  <span className="text-gray-400 ml-1">{plan.period}</span>
+                <div className="mb-2">
+                  <PriceDisplay plan={plan} yearly={yearly} />
                 </div>
+                {plan.monthlyPrice && yearly && (
+                  <div className="text-xs text-green-400 mb-4 flex items-center gap-1.5">
+                    <Tag className="w-3 h-3" />
+                    Saves NPR {((plan.monthlyPrice - (plan.yearlyPrice ?? 0)) * 12).toLocaleString()} per year
+                  </div>
+                )}
+                {!plan.monthlyPrice && <div className="h-6 mb-4" />}
                 <ul className="space-y-3 mb-8 flex-1">
                   {plan.features.map((f) => (
                     <li key={f.name} className="flex items-center gap-3 text-sm">
@@ -179,14 +243,45 @@ export default function Pricing() {
           })}
         </div>
 
+        {/* FAQ */}
         <div className="max-w-3xl mx-auto">
-          <h2 className="text-3xl font-bold text-white font-heading text-center mb-10">Frequently Asked Questions</h2>
-          <div className="space-y-4">
+          <h2 className="text-3xl font-bold text-white font-heading text-center mb-10">
+            Frequently Asked Questions
+          </h2>
+          <div className="space-y-3">
             {faqs.map((faq, i) => (
-              <GlassCard key={i} className="p-6">
-                <h3 className="text-white font-semibold text-lg mb-2">{faq.q}</h3>
-                <p className="text-gray-400">{faq.a}</p>
-              </GlassCard>
+              <div
+                key={i}
+                className="rounded-2xl border border-white/10 bg-[#0F172A]/60 overflow-hidden"
+              >
+                <button
+                  onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                  className="w-full text-left px-6 py-5 flex items-center justify-between gap-4 hover:bg-white/[0.02] transition-colors"
+                >
+                  <span className="text-white font-medium">{faq.q}</span>
+                  <motion.div
+                    animate={{ rotate: openFaq === i ? 45 : 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="text-gray-400 flex-shrink-0 text-xl leading-none"
+                  >
+                    +
+                  </motion.div>
+                </button>
+                <AnimatePresence>
+                  {openFaq === i && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.25 }}
+                    >
+                      <div className="px-6 pb-5 text-gray-400 text-sm leading-relaxed border-t border-white/5 pt-4">
+                        {faq.a}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
             ))}
           </div>
         </div>
