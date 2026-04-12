@@ -87,10 +87,21 @@ function StaticGlobeFallback() {
           <motion.div
             key={i}
             className="absolute top-1/2 left-1/2 rounded-full"
-            style={{ width: dot.size, height: dot.size, background: dot.color, marginTop: -dot.size / 2, marginLeft: dot.orbit - dot.size / 2 }}
+            style={{
+              width: dot.size,
+              height: dot.size,
+              background: dot.color,
+              marginTop: -dot.size / 2,
+              marginLeft: dot.orbit - dot.size / 2,
+              transformOrigin: `-${dot.orbit - dot.size / 2}px center`,
+            }}
             animate={{ rotate: [0, 360] }}
-            transition={{ duration: Math.abs(dot.speed), repeat: Infinity, ease: "linear", direction: dot.speed < 0 ? "reverse" : "normal" }}
-            transformOrigin={`-${dot.orbit - dot.size / 2}px center`}
+            transition={{
+              duration: Math.abs(dot.speed),
+              repeat: Infinity,
+              ease: "linear",
+              repeatType: dot.speed < 0 ? "reverse" : "loop",
+            }}
           />
         ))}
       </div>
