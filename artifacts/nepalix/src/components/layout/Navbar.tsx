@@ -47,21 +47,12 @@ export function Navbar() {
         }`}
       >
         <div className="container mx-auto px-4 md:px-6 flex items-center justify-between">
-          {/* Logo */}
           <Link href="/" className="flex items-center z-50 group">
-            <span className="font-heading font-bold text-2xl tracking-tighter text-white">
-              NEPALI
-              <span
-                style={{
-                  background: "linear-gradient(135deg, #06B6D4, #8B5CF6)",
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
-                  backgroundClip: "text",
-                }}
-              >
-                X
-              </span>
-            </span>
+            <img
+              src="/nepalix-logo.png"
+              alt="Nepalix"
+              className="h-10 w-auto object-contain transition-transform duration-300 group-hover:scale-[1.03]"
+            />
           </Link>
 
           {/* Desktop Nav */}

@@ -43,7 +43,7 @@ function AnalyticsCard({ mouseX, mouseY }: { mouseX: MotionValue<number>; mouseY
           <div className="mb-4 flex items-start justify-between">
             <div>
               <p className="text-sm font-semibold text-white">Dashboard</p>
-              <p className="mt-1 text-[10px] text-slate-500">Fashion retail performance</p>
+              <p className="mt-1 text-[10px] text-slate-500">Retail and ecommerce performance</p>
             </div>
             <LayoutDashboard className="h-4 w-4 text-cyan-300" />
           </div>
@@ -97,10 +97,10 @@ function AnalyticsCard({ mouseX, mouseY }: { mouseX: MotionValue<number>; mouseY
 function InventoryCard({ mouseX, mouseY }: { mouseX: MotionValue<number>; mouseY: MotionValue<number> }) {
   const depth = useDepth(mouseX, mouseY, -34);
   const rows = [
-    ["T-Shirt", "In Stock", "124"],
-    ["Jeans", "Low Stock", "8"],
-    ["Jacket", "In Stock", "45"],
-    ["Sneakers", "In Stock", "67"],
+    ["Best Seller", "In Stock", "124"],
+    ["Daily Essential", "Low Stock", "8"],
+    ["New Arrival", "In Stock", "45"],
+    ["Top Bundle", "In Stock", "67"],
   ];
 
   return (
@@ -238,7 +238,7 @@ export function HeroSection() {
             className="max-w-4xl font-heading text-[clamp(3.4rem,7.2vw,6.25rem)] font-black leading-[0.96] tracking-[-0.055em] text-white drop-shadow-[0_22px_46px_rgba(0,0,0,0.35)]"
             style={{ transform: "translateZ(88px)" }}
           >
-            Run Your Entire Fashion Retail
+            Run Your Entire Retail Business
             <br />
             <span className="bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-500 bg-clip-text text-transparent">
               From One System
@@ -252,7 +252,7 @@ export function HeroSection() {
             className="mt-6 max-w-2xl text-base leading-8 text-slate-300 md:text-lg"
             style={{ transform: "translateZ(70px)" }}
           >
-            Powering next-generation retail experiences. Unify your online store, POS, inventory, orders, and analytics in one system built for Nepal.
+            Powering next-generation retail and ecommerce experiences. Unify your online store, POS, inventory, orders, customers, and analytics in one system built for Nepal.
           </motion.p>
 
           <motion.div
