@@ -1,0 +1,130 @@
+Redesign ONLY the **landing page hero section** of my website. Do NOT modify any other sections, components, or existing layout outside the hero area.
+
+---
+
+### 🎨 HERO DESIGN REQUIREMENTS
+
+Create a modern, premium SaaS-style hero section for "NEPALIX".
+
+#### Layout:
+
+* Centered main content with **left-right floating UI cards**
+* Maintain full-width responsive design
+* Keep navbar unchanged
+
+---
+
+### 🧠 CONTENT
+
+**Badge (top small pill):**
+"NEPAL'S COMMERCE OPERATING SYSTEM"
+
+**Main Heading (large, bold):**
+Run Your Entire Fashion Retail
+**From One System** (gradient color: blue → purple)
+
+**Subheading:**
+Powering next-generation retail experiences. Unify your online store, POS, inventory, orders, and analytics in one system built for Nepal.
+
+---
+
+### 🔘 CTA BUTTONS
+
+* Primary: "Book a Demo" (gradient + glow effect)
+* Secondary: "Explore Product" (outline style)
+
+Add hover effects:
+
+* Slight scale (1.05)
+* Glow or shadow transition
+
+---
+
+### 🧊 VISUAL ELEMENTS
+
+* Add **floating dashboard UI cards**:
+
+  * Left: Analytics graph card
+  * Right: Inventory / POS card
+* Use:
+
+  * Glassmorphism (blur + transparency)
+  * Soft shadows
+  * Rounded corners
+
+---
+
+### ✨ ANIMATIONS (VERY IMPORTANT)
+
+#### 🌀 1. 3D HOVER EFFECT
+
+* When mouse moves inside hero:
+
+  * Entire hero section should tilt slightly (3D perspective)
+  * Cards move with depth (parallax)
+* Use:
+  transform: rotateX(), rotateY(), translateZ()
+* Smooth easing (no jitter)
+
+---
+
+#### 🔥 2. SCROLL EFFECT
+
+* When user scrolls down:
+
+  * Hero content fades slightly
+  * Moves up smoothly
+  * Background gradient shifts subtly
+
+---
+
+#### 💎 3. ENTRANCE ANIMATION
+
+* On page load:
+
+  * Heading fades in + slides up
+  * Buttons appear with slight delay (stagger)
+  * Cards float in from sides
+
+---
+
+### 🎨 BACKGROUND
+
+* Use **dark gradient (navy → black)**
+* Add subtle grid or noise texture
+* Optional:
+
+  * glowing gradient blobs
+  * soft radial light
+
+---
+
+### ⚙️ TECH STACK
+
+Use:
+
+* Tailwind CSS
+* Framer Motion (for animations)
+* Optional: react-parallax-tilt for 3D effect
+
+---
+
+### 🚫 IMPORTANT RULES
+
+* Do NOT change navbar
+* Do NOT touch other sections
+* Only update hero section code
+* Keep it clean and modular
+
+---
+
+### 🎯 GOAL
+
+Make the hero section feel:
+
+* Premium
+* Smooth
+* Interactive
+* Modern startup-level (like Stripe / Linear / Vercel)
+
+Return updated code for hero section only.
