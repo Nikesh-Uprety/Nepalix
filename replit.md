@@ -56,6 +56,22 @@ pnpm workspace monorepo using TypeScript. Each package manages its own dependenc
 - `GET /api/auth/me` — get current user (requires auth)
 - `POST /api/demo-bookings` — create demo booking (public)
 - `GET /api/demo-bookings` — list all bookings (admin only)
+- `POST /api/contact` — submit contact message (public)
+- `GET /api/contact` — list all messages (admin only)
+- `PATCH /api/contact/:id/status` — update message status (admin only)
+- `PATCH /api/account/profile` — update user profile (auth required)
+- `POST /api/account/change-password` — change password (auth required)
+- `GET /api/account/users` — list all users (admin only)
+
+## Pages
+
+- `/` — Home (marketing)
+- `/product`, `/pricing`, `/solutions`, `/plugins`, `/case-studies`, `/compare`, `/about`, `/docs` — Public marketing pages
+- `/book-demo` — Demo booking form (saves to DB)
+- `/contact` — Contact form (saves to DB)
+- `/dashboard` — Protected user dashboard (fullscreen, no navbar)
+- `/account` — Account settings (profile update, change password)
+- `/admin` — Admin panel (demo bookings, contact messages, users) — admin role only
 
 ## Workflows
 

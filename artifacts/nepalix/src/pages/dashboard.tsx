@@ -13,9 +13,12 @@ import {
   Store,
   BarChart3,
   Bell,
+  ShieldCheck,
+  User,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { GlassCard } from "@/components/ui-custom/GlassCard";
+import { Link } from "wouter";
 
 const stats = [
   {
@@ -94,14 +97,15 @@ const statusColors: Record<string, string> = {
 };
 
 const navItems = [
-  { icon: LayoutDashboard, label: "Dashboard", active: true },
-  { icon: ShoppingCart, label: "Orders" },
-  { icon: Package, label: "Products" },
-  { icon: Users, label: "Customers" },
-  { icon: Store, label: "Stores" },
-  { icon: BarChart3, label: "Analytics" },
-  { icon: Calendar, label: "Bookings" },
-  { icon: Settings, label: "Settings" },
+  { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard", active: true },
+  { icon: ShoppingCart, label: "Orders", href: null },
+  { icon: Package, label: "Products", href: null },
+  { icon: Users, label: "Customers", href: null },
+  { icon: Store, label: "Stores", href: null },
+  { icon: BarChart3, label: "Analytics", href: null },
+  { icon: Calendar, label: "Bookings", href: null },
+  { icon: User, label: "Account", href: "/account" },
+  { icon: Settings, label: "Settings", href: null },
 ];
 
 export default function Dashboard() {
@@ -143,20 +147,32 @@ export default function Dashboard() {
         <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
           {navItems.map((item) => {
             const Icon = item.icon;
-            return (
-              <button
-                key={item.label}
-                className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${
-                  item.active
-                    ? "bg-[#06B6D4]/15 text-cyan-400 border border-[#06B6D4]/20"
-                    : "text-gray-400 hover:text-white hover:bg-white/5"
-                }`}
-              >
+            const cls = `w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${
+              item.active
+                ? "bg-[#06B6D4]/15 text-cyan-400 border border-[#06B6D4]/20"
+                : "text-gray-400 hover:text-white hover:bg-white/5"
+            }`;
+            return item.href ? (
+              <Link key={item.label} href={item.href} className={cls}>
+                <Icon className="w-4 h-4" />
+                {item.label}
+              </Link>
+            ) : (
+              <button key={item.label} className={cls}>
                 <Icon className="w-4 h-4" />
                 {item.label}
               </button>
             );
           })}
+          {user?.role === "admin" && (
+            <Link
+              href="/admin"
+              className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-purple-400 hover:text-purple-300 hover:bg-purple-400/5 transition-all"
+            >
+              <ShieldCheck className="w-4 h-4" />
+              Admin Panel
+            </Link>
+          )}
         </nav>
         <div className="p-4 border-t border-white/[0.06]">
           <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-white/[0.03] mb-2">

@@ -7,6 +7,7 @@ import { MapPin, Phone, Mail, MessageSquare, CheckCircle, AlertCircle } from "lu
 import { SectionWrapper } from "@/components/ui-custom/SectionWrapper";
 import { GlassCard } from "@/components/ui-custom/GlassCard";
 import { GradientButton } from "@/components/ui-custom/GradientButton";
+import { api } from "@/lib/api";
 
 const contactSchema = z.object({
   name: z.string().min(2, "Please enter your full name"),
@@ -26,6 +27,7 @@ const contactInfo = [
 
 export default function Contact() {
   const [submitted, setSubmitted] = useState(false);
+  const [serverError, setServerError] = useState("");
 
   const {
     register,
@@ -33,13 +35,16 @@ export default function Contact() {
     formState: { errors, isSubmitting },
   } = useForm<ContactFormValues>({ resolver: zodResolver(contactSchema) });
 
-  function onSubmit(_data: ContactFormValues) {
-    return new Promise<void>((resolve) => {
-      setTimeout(() => {
-        setSubmitted(true);
-        resolve();
-      }, 700);
-    });
+  async function onSubmit(data: ContactFormValues) {
+    setServerError("");
+    try {
+      await api.contact.send(data);
+      setSubmitted(true);
+    } catch (e: unknown) {
+      setServerError(
+        e instanceof Error ? e.message : "Something went wrong. Please try again."
+      );
+    }
   }
 
   function FieldError({ name }: { name: keyof ContactFormValues }) {
@@ -96,7 +101,6 @@ export default function Contact() {
               })}
             </div>
 
-            {/* Map placeholder */}
             <div className="rounded-2xl border border-white/10 bg-[#0F172A]/60 overflow-hidden h-60 relative">
               <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-6">
                 <MapPin className="w-10 h-10 text-cyan-400 mb-3" />
@@ -104,7 +108,6 @@ export default function Contact() {
                 <p className="text-gray-500 text-sm mt-1">Near Naxal Intersection</p>
                 <p className="text-gray-600 text-xs mt-3">Office hours: Sun–Fri, 9AM–6PM NPT</p>
               </div>
-              {/* Grid pattern */}
               <div
                 className="absolute inset-0 opacity-[0.03]"
                 style={{
@@ -134,6 +137,12 @@ export default function Contact() {
             ) : (
               <GlassCard>
                 <h2 className="text-2xl font-bold text-white font-heading mb-6">Send a Message</h2>
+                {serverError && (
+                  <div className="mb-4 px-4 py-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                    {serverError}
+                  </div>
+                )}
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
                   <div className="grid grid-cols-2 gap-4">
                     <div>

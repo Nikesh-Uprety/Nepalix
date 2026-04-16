@@ -20,8 +20,12 @@ import BookDemo from "@/pages/book-demo";
 import Contact from "@/pages/contact";
 import Docs from "@/pages/docs";
 import Dashboard from "@/pages/dashboard";
+import AccountSettings from "@/pages/account";
+import Admin from "@/pages/admin";
 
 const queryClient = new QueryClient();
+
+const FULLSCREEN_ROUTES = ["/dashboard", "/admin"];
 
 function ScrollToTop() {
   const [location] = useLocation();
@@ -35,16 +39,16 @@ function ScrollToTop() {
 
 function AppShell({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
-  const isDashboard = location === "/dashboard";
+  const isFullscreen = FULLSCREEN_ROUTES.some(
+    (r) => location === r || location.startsWith(r + "/")
+  );
 
   return (
     <div className="flex flex-col min-h-screen bg-[#070B14]">
       <ScrollToTop />
-      {!isDashboard && <Navbar />}
-      <main className={isDashboard ? "flex-1" : "flex-1"}>
-        {children}
-      </main>
-      {!isDashboard && <Footer />}
+      {!isFullscreen && <Navbar />}
+      <main className="flex-1">{children}</main>
+      {!isFullscreen && <Footer />}
     </div>
   );
 }
@@ -64,6 +68,8 @@ function Router() {
       <Route path="/contact" component={Contact} />
       <Route path="/docs" component={Docs} />
       <Route path="/dashboard" component={Dashboard} />
+      <Route path="/account" component={AccountSettings} />
+      <Route path="/admin" component={Admin} />
       <Route component={NotFound} />
     </Switch>
   );
