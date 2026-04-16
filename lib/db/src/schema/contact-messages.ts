@@ -13,7 +13,7 @@ export const contactMessagesTable = pgTable("contact_messages", {
 });
 
 export const insertContactMessageSchema = createInsertSchema(
-  contactMessagesTable
+  contactMessagesTable,
 ).omit({ id: true, status: true, createdAt: true });
 
 export const contactMessageRequestSchema = z.object({
