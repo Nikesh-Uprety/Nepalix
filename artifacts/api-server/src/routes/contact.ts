@@ -30,23 +30,19 @@ router.post("/", async (req: Request, res: Response) => {
   }
 });
 
-router.get(
-  "/",
-  authMiddleware,
-  async (req: AuthRequest, res: Response) => {
-    if (req.user?.role !== "admin") {
-      res.status(403).json({ error: "Forbidden" });
-      return;
-    }
-
-    const messages = await db
-      .select()
-      .from(contactMessagesTable)
-      .orderBy(desc(contactMessagesTable.createdAt));
-
-    res.json({ messages });
+router.get("/", authMiddleware, async (req: AuthRequest, res: Response) => {
+  if (req.user?.role !== "admin") {
+    res.status(403).json({ error: "Forbidden" });
+    return;
   }
-);
+
+  const messages = await db
+    .select()
+    .from(contactMessagesTable)
+    .orderBy(desc(contactMessagesTable.createdAt));
+
+  res.json({ messages });
+});
 
 router.patch(
   "/:id/status",
@@ -63,11 +59,11 @@ router.patch(
     const [updated] = await db
       .update(contactMessagesTable)
       .set({ status })
-      .where(eq(contactMessagesTable.id, id))
+      .where(eq(contactMessagesTable.id, String(id)))
       .returning();
 
     res.json({ message: updated });
-  }
+  },
 );
 
 export default router;
