@@ -11,7 +11,6 @@ COPY artifacts/nepalix/public ./artifacts/nepalix/public
 COPY artifacts/nepalix/index.html ./artifacts/nepalix/
 COPY artifacts/nepalix/vite.config.ts ./artifacts/nepalix/
 COPY artifacts/nepalix/components.json ./artifacts/nepalix/
-COPY artifacts/nepalix/.env ./artifacts/nepalix/
 COPY attached_assets/ ./attached_assets/
 
 RUN printf '{"extends":"../../tsconfig.base.json","include":["src/**/*"]}' > /app/artifacts/nepalix/tsconfig.json
