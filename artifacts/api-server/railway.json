@@ -1,10 +1,10 @@
 {
   "$schema": "https://railway.app/schema.json",
   "build": {
-    "command": "cd ../.. && pnpm install --no-frozen-lockfile && cd artifacts/api-server && pnpm run build"
+    "builder": "DOCKERFILE",
+    "dockerfilePath": "Dockerfile"
   },
   "deploy": {
-    "startCommand": "/bin/sh -c 'PORT=10000 node --enable-source-maps ./dist/index.mjs'",
     "env": {
       "PORT": "10000",
       "DATABASE_PUBLIC_URL": "postgresql://neondb_owner:npg_UNZMsT1QE7KY@ep-floral-sea-a1yth453-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require",
