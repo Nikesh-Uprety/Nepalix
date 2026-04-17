@@ -21,7 +21,7 @@ RUN pnpm install --no-frozen-lockfile --filter @workspace/api-server...
 RUN pnpm --filter @workspace/api-server run build
 
 FROM node:22-alpine
-WORKDIR /app
+WORKDIR /app/artifacts/api-server
 
 COPY --from=builder /app/artifacts/api-server/dist ./dist
 
