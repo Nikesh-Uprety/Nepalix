@@ -8,8 +8,8 @@
     "startCommand": "node --enable-source-maps ./dist/index.mjs",
     "env": {
       "PORT": "10000",
-      "DATABASE_PUBLIC_URL": "postgresql://neondb_owner:npg_UNZMsT1QE7KY@ep-floral-sea-a1yth453-pooler.ap-southeast-1.aws.neon.tech/nepalix?sslmode=require&channel_binding=require",
-      "NEON_DATABASE_URL": "postgresql://neondb_owner:npg_UNZMsT1QE7KY@ep-floral-sea-a1yth453-pooler.ap-southeast-1.aws.neon.tech/nepalix?sslmode=require&channel_binding=require",
+      "DATABASE_PUBLIC_URL": "postgresql://neondb_owner:npg_UNZMsT1QE7KY@ep-floral-sea-a1yth453-pooler.ap-southeast-1.aws.neon.tech/nepalix?sslmode=require&channel_binding=disable",
+      "NEON_DATABASE_URL": "postgresql://neondb_owner:npg_UNZMsT1QE7KY@ep-floral-sea-a1yth453-pooler.ap-southeast-1.aws.neon.tech/nepalix?sslmode=require&channel_binding=disable",
       "SESSION_SECRET": "nepalix-super-secret-key-change-this-to-something-long-and-random-2024"
     }
   }
