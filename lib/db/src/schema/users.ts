@@ -7,7 +7,9 @@ export const usersTable = pgTable("users", {
   passwordHash: text("password_hash").notNull(),
   firstName: text("first_name").notNull(),
   lastName: text("last_name").notNull(),
-  role: text("role").notNull().default("user"),
+  role: text("role").notNull().default("owner"),
+  storeId: uuid("store_id"),
+  adminPageAccess: text("admin_page_access").array(),
   googleId: text("google_id"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
@@ -31,16 +33,9 @@ export type InsertUser = {
   firstName: string;
   lastName: string;
   role?: string;
+  storeId?: string;
+  adminPageAccess?: string[];
   googleId?: string;
 };
 
-export type User = {
-  id: string;
-  email: string;
-  passwordHash: string;
-  firstName: string;
-  lastName: string;
-  role: string;
-  createdAt: Date;
-  updatedAt: Date;
-};
+export type User = typeof usersTable.$inferSelect;

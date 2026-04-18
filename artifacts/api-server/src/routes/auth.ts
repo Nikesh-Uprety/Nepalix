@@ -10,6 +10,8 @@ import {
 } from "@workspace/db";
 import { eq } from "drizzle-orm";
 import { authMiddleware, type AuthRequest } from "../middlewares/auth.js";
+import { createTrialSubscription } from "./subscriptions.js";
+import { logger } from "../lib/logger.js";
 
 const router: IRouter = Router();
 
@@ -58,6 +60,15 @@ router.post("/register", async (req: Request, res: Response) => {
         role: "user",
       })
       .returning();
+
+    try {
+      await createTrialSubscription(user.id);
+    } catch (err) {
+      logger.warn(
+        { err, userId: user.id },
+        "Failed to create trial subscription for new user"
+      );
+    }
 
     const token = randomBytes(32).toString("hex");
     const expiresAt = new Date(Date.now() + COOKIE_MAX_AGE);
@@ -250,6 +261,15 @@ router.get("/google/callback", async (req: Request, res: Response) => {
           googleId: googleUser.id,
         })
         .returning();
+
+      try {
+        await createTrialSubscription(user.id);
+      } catch (err) {
+        logger.warn(
+          { err, userId: user.id },
+          "Failed to create trial subscription for new Google user"
+        );
+      }
     } else if (!user.googleId) {
       [user] = await db
         .update(usersTable)
