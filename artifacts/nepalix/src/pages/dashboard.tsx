@@ -139,7 +139,7 @@ export default function Dashboard() {
       <aside className="hidden lg:flex flex-col w-64 border-r border-white/[0.06] bg-[#0A0F1E] shrink-0">
         <div className="p-6 border-b border-white/[0.06]">
           <img
-            src="/logo.svg"
+            src="/whitenepalilogo.png"
             alt="Nepalix"
             className="h-8 w-auto object-contain"
           />

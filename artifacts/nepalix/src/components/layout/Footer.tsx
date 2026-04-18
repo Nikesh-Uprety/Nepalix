@@ -10,7 +10,7 @@ export function Footer() {
           <div className="lg:col-span-2">
             <Link href="/" className="inline-block mb-5">
               <img
-                src="/logo.svg"
+                src="/whitenepalilogo.png"
                 alt="Nepalix"
                 className="h-14 w-auto object-contain"
               />
