@@ -31,7 +31,7 @@ const caseStudies = [
     location: "Thamel, Kathmandu",
     logo: "HR",
     logoColor: "#F59E0B",
-    image: "/case-study-2.png",
+    image: "/hero-dashboard.png",
     summary: "Went from zero online presence to 150% growth in online orders within 3 months of launching with NEPALIX.",
     quote: "NEPALIX didn't just give us a website — it gave us a whole commerce system. Our baristas now focus on coffee, not spreadsheets.",
     quoteName: "Priya Maharjan",
@@ -50,7 +50,7 @@ const caseStudies = [
     location: "New Road & Durbar Marg",
     logo: "KA",
     logoColor: "#EC4899",
-    image: "/case-study-3.png",
+    image: "/hero-dashboard.png",
     summary: "Unified 5 retail locations across Kathmandu with a single POS and inventory system, eliminating stock discrepancies.",
     quote: "We used to spend 4 hours every morning reconciling stock between stores. With NEPALIX POS, it's real-time. We got our mornings back.",
     quoteName: "Bikash Shrestha",
@@ -69,7 +69,7 @@ const caseStudies = [
     location: "Putalisadak, Kathmandu",
     logo: "TH",
     logoColor: "#3B82F6",
-    image: "/case-study-2.png",
+    image: "/hero-dashboard.png",
     summary: "Scaled from a single shop to an e-commerce powerhouse with serial number tracking and warranty management built-in.",
     quote: "Every other platform we tried was built for foreign markets. NEPALIX actually understands Nepal — the payment gateways just work.",
     quoteName: "Aarav Singh",
@@ -177,26 +177,23 @@ export default function CaseStudies() {
                 </blockquote>
               </div>
 
-              {/* Right: Metrics / Featured Image */}
+              {/* Right: Image */}
               {cs.image ? (
-                 <div
-                 className="lg:col-span-2 relative min-h-[300px]"
-               >
-                 <div className="absolute inset-0 bg-gradient-to-t from-[#070B14] via-transparent to-transparent z-10" />
-                 <img src={cs.image} alt={`${cs.company} showcase`} className="absolute inset-0 w-full h-full object-cover" />
-                 <div className="absolute bottom-0 left-0 right-0 p-8 z-20">
-                     <div className="grid grid-cols-3 gap-4">
-                       {cs.metrics.map((m, mi) => (
-                         <div key={mi} className="text-center bg-[#070B14]/80 backdrop-blur-md rounded-xl p-3 border border-white/10">
-                           <div className="text-xl font-bold text-white font-heading mb-1" style={{ color: cs.color }}>
-                             {m.value}
-                           </div>
-                           <div className="text-gray-400 text-xs leading-tight">{m.label}</div>
-                         </div>
-                       ))}
-                     </div>
-                 </div>
-               </div>
+                <div className="lg:col-span-2 relative h-[350px] lg:h-auto">
+                  <img src={cs.image} alt={`${cs.company} showcase`} className="absolute inset-0 w-full h-full object-cover lg:object-contain" />
+                  <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-[#070B14] to-transparent">
+                    <div className="grid grid-cols-3 gap-2">
+                      {cs.metrics.map((m, mi) => (
+                        <div key={mi} className="text-center bg-[#070B14]/80 backdrop-blur-md rounded-lg p-2 border border-white/10">
+                          <div className="text-lg font-bold text-white font-heading" style={{ color: cs.color }}>
+                            {m.value}
+                          </div>
+                          <div className="text-gray-400 text-xs">{m.label}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
               ) : (
                 <div
                   className="lg:col-span-2 p-8 lg:p-12 flex flex-col justify-center gap-8"
