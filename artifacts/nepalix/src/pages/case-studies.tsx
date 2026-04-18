@@ -4,8 +4,6 @@ import { SectionWrapper } from "@/components/ui-custom/SectionWrapper";
 import { GlassCard } from "@/components/ui-custom/GlassCard";
 import { GradientButton } from "@/components/ui-custom/GradientButton";
 
-import rareImg from "@assets/image_1776100592841.png"; // Using one of the screenshots as a hero image for the case study
-
 const caseStudies = [
   {
     company: "Rare Atelier",
@@ -13,6 +11,7 @@ const caseStudies = [
     location: "Kathmandu & Online",
     logo: "RA",
     logoColor: "#06B6D4",
+    image: "/case-study-1.png",
     summary: "Rare Atelier runs their entire fashion retail operation on NEPALIX. From their visual canvas storefront to physical POS, inventory tracking, and billing—all orchestrated through a single unified commerce OS.",
     quote: "We don't need multiple disconnected apps anymore. NEPALIX gives us a complete infrastructure to scale our fashion brand natively in Nepal.",
     quoteName: "Founding Team",
@@ -25,7 +24,6 @@ const caseStudies = [
     color: "#06B6D4",
     tags: ["Canvas Customization", "POS", "Inventory", "Live E-commerce"],
     link: "https://rare-np-production.up.railway.app/",
-    featured: true
   },
   {
     company: "Himalayan Roasters",
@@ -33,6 +31,7 @@ const caseStudies = [
     location: "Thamel, Kathmandu",
     logo: "HR",
     logoColor: "#F59E0B",
+    image: "/case-study-2.png",
     summary: "Went from zero online presence to 150% growth in online orders within 3 months of launching with NEPALIX.",
     quote: "NEPALIX didn't just give us a website — it gave us a whole commerce system. Our baristas now focus on coffee, not spreadsheets.",
     quoteName: "Priya Maharjan",
@@ -51,6 +50,7 @@ const caseStudies = [
     location: "New Road & Durbar Marg",
     logo: "KA",
     logoColor: "#EC4899",
+    image: "/case-study-3.png",
     summary: "Unified 5 retail locations across Kathmandu with a single POS and inventory system, eliminating stock discrepancies.",
     quote: "We used to spend 4 hours every morning reconciling stock between stores. With NEPALIX POS, it's real-time. We got our mornings back.",
     quoteName: "Bikash Shrestha",
@@ -69,6 +69,7 @@ const caseStudies = [
     location: "Putalisadak, Kathmandu",
     logo: "TH",
     logoColor: "#3B82F6",
+    image: "/case-study-2.png",
     summary: "Scaled from a single shop to an e-commerce powerhouse with serial number tracking and warranty management built-in.",
     quote: "Every other platform we tried was built for foreign markets. NEPALIX actually understands Nepal — the payment gateways just work.",
     quoteName: "Aarav Singh",
@@ -177,12 +178,12 @@ export default function CaseStudies() {
               </div>
 
               {/* Right: Metrics / Featured Image */}
-              {cs.featured ? (
+              {cs.image ? (
                  <div
                  className="lg:col-span-2 relative min-h-[300px]"
                >
                  <div className="absolute inset-0 bg-gradient-to-t from-[#070B14] via-transparent to-transparent z-10" />
-                 <img src={rareImg} alt={`${cs.company} showcase`} className="absolute inset-0 w-full h-full object-cover" />
+                 <img src={cs.image} alt={`${cs.company} showcase`} className="absolute inset-0 w-full h-full object-cover" />
                  <div className="absolute bottom-0 left-0 right-0 p-8 z-20">
                      <div className="grid grid-cols-3 gap-4">
                        {cs.metrics.map((m, mi) => (
