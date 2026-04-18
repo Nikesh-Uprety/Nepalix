@@ -25,10 +25,11 @@ import Admin from "@/pages/admin";
 import Billing from "@/pages/billing";
 import BillingCallback from "@/pages/billing-callback";
 import AdminUsers from "@/pages/admin-users";
+import Checkout from "@/pages/checkout";
 
 const queryClient = new QueryClient();
 
-const FULLSCREEN_ROUTES = ["/dashboard", "/admin", "/billing"];
+const FULLSCREEN_ROUTES = ["/dashboard", "/admin", "/billing", "/checkout"];
 
 function ScrollToTop() {
   const [location] = useLocation();
@@ -75,6 +76,7 @@ function Router() {
       <Route path="/admin" component={Admin} />
       <Route path="/billing" component={Billing} />
       <Route path="/billing/callback" component={BillingCallback} />
+      <Route path="/checkout" component={Checkout} />
       <Route path="/admin/users" component={AdminUsers} />
       <Route component={NotFound} />
     </Switch>
