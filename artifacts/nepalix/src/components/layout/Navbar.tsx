@@ -84,7 +84,7 @@ export function Navbar() {
         <div className="container mx-auto px-4 md:px-6 flex items-center justify-between">
           <Link href="/" className="flex items-center z-50 group">
             <img
-              src="/whitenepalilogo.png"
+              src="/whitelogonepalix.svg"
               alt="Nepalix"
               className="h-10 w-auto object-contain transition-transform duration-300 group-hover:scale-[1.03]"
             />
