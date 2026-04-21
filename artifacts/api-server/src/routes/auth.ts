@@ -7,7 +7,25 @@ import {
   sessionsTable,
   registerSchema,
   loginSchema,
+  getAdminAllowedPages,
+  canAccessAdminPanel,
+  type User,
 } from "@workspace/db";
+
+export function toAuthUserResponse(user: User) {
+  return {
+    id: user.id,
+    email: user.email,
+    firstName: user.firstName,
+    lastName: user.lastName,
+    role: user.role,
+    storeId: user.storeId ?? null,
+    adminPageAccess: user.adminPageAccess ?? null,
+    canAccessAdmin: canAccessAdminPanel(user.role),
+    allowedAdminPages: getAdminAllowedPages(user.role, user.adminPageAccess),
+    createdAt: user.createdAt,
+  };
+}
 import { eq } from "drizzle-orm";
 import { authMiddleware, type AuthRequest } from "../middlewares/auth.js";
 import { createTrialSubscription } from "./subscriptions.js";
@@ -81,16 +99,7 @@ router.post("/register", async (req: Request, res: Response) => {
 
     setSessionCookie(res, token);
 
-    res.status(201).json({
-      user: {
-        id: user.id,
-        email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        role: user.role,
-        createdAt: user.createdAt,
-      },
-    });
+    res.status(201).json({ user: toAuthUserResponse(user) });
   } catch (err) {
     throw err;
   }
@@ -134,16 +143,7 @@ router.post("/login", async (req: Request, res: Response) => {
 
     setSessionCookie(res, token);
 
-    res.json({
-      user: {
-        id: user.id,
-        email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        role: user.role,
-        createdAt: user.createdAt,
-      },
-    });
+    res.json({ user: toAuthUserResponse(user) });
   } catch (err) {
     throw err;
   }
@@ -162,16 +162,7 @@ router.post("/logout", authMiddleware, async (req: AuthRequest, res: Response) =
 
 router.get("/me", authMiddleware, (req: AuthRequest, res: Response) => {
   const user = req.user!;
-  res.json({
-    user: {
-      id: user.id,
-      email: user.email,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      role: user.role,
-      createdAt: user.createdAt,
-    },
-  });
+  res.json({ user: toAuthUserResponse(user) });
 });
 
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;

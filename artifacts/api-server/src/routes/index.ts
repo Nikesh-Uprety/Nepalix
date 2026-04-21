@@ -8,6 +8,15 @@ import plansRouter from "./plans.js";
 import subscriptionsRouter from "./subscriptions.js";
 import paymentsRouter from "./payments.js";
 import adminRouter from "./admin.js";
+import adminProductsRouter from "./admin-products.js";
+import adminOrdersRouter from "./admin-orders.js";
+import adminCustomersRouter from "./admin-customers.js";
+import adminInventoryRouter from "./admin-inventory.js";
+import adminPromoCodesRouter from "./admin-promo-codes.js";
+import adminAnalyticsRouter from "./admin-analytics.js";
+import adminMarketingRouter from "./admin-marketing.js";
+import adminNotificationsRouter from "./admin-notifications.js";
+import adminBillsRouter from "./admin-bills.js";
 
 const router: IRouter = Router();
 
@@ -19,6 +28,15 @@ router.use("/account", accountRouter);
 router.use("/plans", plansRouter);
 router.use("/subscriptions", subscriptionsRouter);
 router.use("/payments", paymentsRouter);
+router.use("/admin/products", adminProductsRouter);
+router.use("/admin/orders", adminOrdersRouter);
+router.use("/admin/customers", adminCustomersRouter);
+router.use("/admin/inventory", adminInventoryRouter);
+router.use("/admin/promo-codes", adminPromoCodesRouter);
+router.use("/admin/analytics", adminAnalyticsRouter);
+router.use("/admin/marketing", adminMarketingRouter);
+router.use("/admin/notifications", adminNotificationsRouter);
+router.use("/admin/bills", adminBillsRouter);
 router.use("/admin", adminRouter);
 
 export default router;

@@ -50,8 +50,182 @@ export type AuthUser = {
   firstName: string;
   lastName: string;
   role: string;
+  storeId: string | null;
+  adminPageAccess: string[] | null;
+  canAccessAdmin: boolean;
+  allowedAdminPages: string[];
   createdAt: string;
 };
+
+export type AdminProduct = {
+  id: string;
+  storeId: string;
+  name: string;
+  slug: string | null;
+  description: string | null;
+  sku: string | null;
+  price: number;
+  comparePrice: number | null;
+  currency: string;
+  stock: number;
+  images: string[];
+  status: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type AdminProductInput = {
+  name: string;
+  slug?: string;
+  description?: string;
+  sku?: string;
+  price?: number;
+  comparePrice?: number;
+  currency?: string;
+  stock?: number;
+  images?: string[];
+  status?: "active" | "draft" | "archived";
+  isActive?: boolean;
+};
+
+export type AdminOrderListItem = {
+  id: string;
+  orderNumber: string;
+  customerId: string | null;
+  customerName: string;
+  customerEmail: string | null;
+  items: { productId: string; name: string; price: number; quantity: number }[];
+  subtotal: number;
+  tax: number;
+  total: number;
+  currency: string;
+  status: string;
+  paymentStatus: string;
+  createdAt: string;
+};
+
+export type AdminCustomer = {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string | null;
+  notes: string | null;
+  createdAt: string;
+  ordersCount: number;
+  totalSpent: number;
+};
+
+export type AdminCustomerInput = {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone?: string;
+  notes?: string;
+};
+
+export type AdminInventoryItem = {
+  id: string;
+  name: string;
+  sku: string | null;
+  stock: number;
+  price: number;
+  status: string;
+};
+
+export type AdminPromoCode = {
+  id: string;
+  storeId: string;
+  code: string;
+  description: string | null;
+  discountType: string;
+  discountValue: number;
+  minOrderAmount: number;
+  usageLimit: number | null;
+  usageCount: number;
+  startsAt: string | null;
+  endsAt: string | null;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type AdminPromoCodeInput = {
+  code: string;
+  description?: string;
+  discountType?: "percent" | "fixed";
+  discountValue: number;
+  minOrderAmount?: number;
+  usageLimit?: number;
+  startsAt?: string;
+  endsAt?: string;
+  isActive?: boolean;
+};
+
+export type AdminMarketingCampaign = {
+  id: string;
+  storeId: string;
+  name: string;
+  channel: string;
+  status: string;
+  subject: string | null;
+  content: string | null;
+  audience: unknown;
+  sentCount: number;
+  openCount: number;
+  clickCount: number;
+  scheduledAt: string | null;
+  sentAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type AdminMarketingCampaignInput = {
+  name: string;
+  channel?: "email" | "sms" | "whatsapp" | "push";
+  status?: "draft" | "scheduled" | "sent" | "paused";
+  subject?: string;
+  content?: string;
+  scheduledAt?: string;
+};
+
+export type AdminNotification = {
+  id: string;
+  storeId: string;
+  userId: string | null;
+  type: string;
+  title: string;
+  body: string | null;
+  link: string | null;
+  meta: unknown;
+  isRead: boolean;
+  createdAt: string;
+};
+
+export type AdminBill = {
+  id: string;
+  userId: string;
+  userEmail: string | null;
+  userName: string | null;
+  planSlug: string | null;
+  planName: string | null;
+  provider: string;
+  providerTxnId: string | null;
+  amount: number;
+  currency: string;
+  status: string;
+  createdAt: string;
+};
+
+export type AdminAnalyticsOverview = {
+  orders: number;
+  revenue: number;
+  customers: number;
+  products: number;
+};
+
+export type AdminOrdersTrendPoint = { day: string; orders: number; revenue: number };
 
 export type DemoBooking = {
   id: string;
@@ -304,5 +478,124 @@ export const api = {
       trialingSubscriptions: number;
       totalRevenueNpr: number;
     }>("/admin/stats"),
+
+    products: {
+      list: (params: { q?: string; status?: string; limit?: number; offset?: number } = {}) => {
+        const q = new URLSearchParams();
+        if (params.q) q.set("q", params.q);
+        if (params.status) q.set("status", params.status);
+        if (params.limit !== undefined) q.set("limit", String(params.limit));
+        if (params.offset !== undefined) q.set("offset", String(params.offset));
+        const qs = q.toString();
+        return request<{ products: AdminProduct[]; total: number }>(`/admin/products${qs ? `?${qs}` : ""}`);
+      },
+      get: (id: string) => request<{ product: AdminProduct }>(`/admin/products/${id}`),
+      create: (input: AdminProductInput) =>
+        request<{ product: AdminProduct }>("/admin/products", { method: "POST", body: input }),
+      update: (id: string, input: Partial<AdminProductInput>) =>
+        request<{ product: AdminProduct }>(`/admin/products/${id}`, { method: "PATCH", body: input }),
+      remove: (id: string) =>
+        request<{ success: boolean }>(`/admin/products/${id}`, { method: "DELETE" }),
+    },
+
+    orders: {
+      list: (params: { status?: string; paymentStatus?: string; limit?: number; offset?: number } = {}) => {
+        const q = new URLSearchParams();
+        if (params.status) q.set("status", params.status);
+        if (params.paymentStatus) q.set("paymentStatus", params.paymentStatus);
+        if (params.limit !== undefined) q.set("limit", String(params.limit));
+        if (params.offset !== undefined) q.set("offset", String(params.offset));
+        const qs = q.toString();
+        return request<{ orders: AdminOrderListItem[]; total: number }>(`/admin/orders${qs ? `?${qs}` : ""}`);
+      },
+      get: (id: string) =>
+        request<{ order: AdminOrderListItem; customer: AdminCustomer | null }>(`/admin/orders/${id}`),
+      update: (id: string, patch: { status?: string; paymentStatus?: string }) =>
+        request<{ order: AdminOrderListItem }>(`/admin/orders/${id}`, { method: "PATCH", body: patch }),
+    },
+
+    customers: {
+      list: (params: { q?: string; limit?: number; offset?: number } = {}) => {
+        const q = new URLSearchParams();
+        if (params.q) q.set("q", params.q);
+        if (params.limit !== undefined) q.set("limit", String(params.limit));
+        if (params.offset !== undefined) q.set("offset", String(params.offset));
+        const qs = q.toString();
+        return request<{ customers: AdminCustomer[]; total: number }>(`/admin/customers${qs ? `?${qs}` : ""}`);
+      },
+      get: (id: string) =>
+        request<{ customer: AdminCustomer; orders: AdminOrderListItem[] }>(`/admin/customers/${id}`),
+      create: (input: AdminCustomerInput) =>
+        request<{ customer: AdminCustomer }>("/admin/customers", { method: "POST", body: input }),
+      update: (id: string, input: Partial<AdminCustomerInput>) =>
+        request<{ customer: AdminCustomer }>(`/admin/customers/${id}`, { method: "PATCH", body: input }),
+      remove: (id: string) =>
+        request<{ success: boolean }>(`/admin/customers/${id}`, { method: "DELETE" }),
+    },
+
+    inventory: {
+      list: () => request<{ items: AdminInventoryItem[] }>("/admin/inventory"),
+      lowStock: (threshold = 10) =>
+        request<{ items: AdminInventoryItem[]; threshold: number }>(
+          `/admin/inventory/low-stock?threshold=${threshold}`,
+        ),
+      adjust: (id: string, delta: number) =>
+        request<{ product: AdminProduct }>(`/admin/inventory/${id}/adjust`, {
+          method: "POST",
+          body: { delta },
+        }),
+      set: (id: string, stock: number) =>
+        request<{ product: AdminProduct }>(`/admin/inventory/${id}/set`, {
+          method: "POST",
+          body: { stock },
+        }),
+    },
+
+    promoCodes: {
+      list: () => request<{ promoCodes: AdminPromoCode[] }>("/admin/promo-codes"),
+      create: (input: AdminPromoCodeInput) =>
+        request<{ promoCode: AdminPromoCode }>("/admin/promo-codes", { method: "POST", body: input }),
+      update: (id: string, input: Partial<AdminPromoCodeInput>) =>
+        request<{ promoCode: AdminPromoCode }>(`/admin/promo-codes/${id}`, { method: "PATCH", body: input }),
+      remove: (id: string) =>
+        request<{ success: boolean }>(`/admin/promo-codes/${id}`, { method: "DELETE" }),
+    },
+
+    analytics: {
+      overview: () => request<AdminAnalyticsOverview>("/admin/analytics/overview"),
+      ordersTrend: (days = 30) =>
+        request<{ days: number; series: AdminOrdersTrendPoint[] }>(`/admin/analytics/orders-trend?days=${days}`),
+      topProducts: () =>
+        request<{ products: AdminProduct[] }>("/admin/analytics/top-products"),
+    },
+
+    marketing: {
+      list: () => request<{ campaigns: AdminMarketingCampaign[] }>("/admin/marketing"),
+      create: (input: AdminMarketingCampaignInput) =>
+        request<{ campaign: AdminMarketingCampaign }>("/admin/marketing", { method: "POST", body: input }),
+      update: (id: string, input: Partial<AdminMarketingCampaignInput>) =>
+        request<{ campaign: AdminMarketingCampaign }>(`/admin/marketing/${id}`, { method: "PATCH", body: input }),
+      remove: (id: string) =>
+        request<{ success: boolean }>(`/admin/marketing/${id}`, { method: "DELETE" }),
+    },
+
+    notifications: {
+      list: () =>
+        request<{ notifications: AdminNotification[]; unread: number }>("/admin/notifications"),
+      markRead: (id: string) =>
+        request<{ notification: AdminNotification }>(`/admin/notifications/${id}/read`, { method: "POST" }),
+      markAllRead: () =>
+        request<{ success: boolean }>("/admin/notifications/read-all", { method: "POST" }),
+      create: (input: { type?: string; title: string; body?: string; link?: string }) =>
+        request<{ notification: AdminNotification }>("/admin/notifications", { method: "POST", body: input }),
+    },
+
+    bills: {
+      list: () =>
+        request<{
+          bills: AdminBill[];
+          summary: { totalRevenue: number; pending: number; verified: number; failed: number };
+        }>("/admin/bills"),
+    },
   },
 };

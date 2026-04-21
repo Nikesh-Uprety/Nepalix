@@ -8,3 +8,6 @@ export * from "./payments";
 export * from "./products";
 export * from "./customers";
 export * from "./orders";
+export * from "./promo-codes";
+export * from "./notifications";
+export * from "./marketing-campaigns";

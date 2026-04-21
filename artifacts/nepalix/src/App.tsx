@@ -21,7 +21,19 @@ import Contact from "@/pages/contact";
 import Docs from "@/pages/docs";
 import Dashboard from "@/pages/dashboard";
 import AccountSettings from "@/pages/account";
-import Admin from "@/pages/admin";
+import AdminIndex from "@/pages/admin/index";
+import AdminDashboard from "@/pages/admin/dashboard";
+import AdminProducts from "@/pages/admin/products";
+import AdminOrders from "@/pages/admin/orders";
+import AdminCustomers from "@/pages/admin/customers";
+import AdminInventory from "@/pages/admin/inventory";
+import AdminPromoCodes from "@/pages/admin/promo-codes";
+import AdminAnalytics from "@/pages/admin/analytics";
+import AdminMarketing from "@/pages/admin/marketing";
+import AdminNotifications from "@/pages/admin/notifications";
+import AdminBills from "@/pages/admin/bills";
+import AdminMessages from "@/pages/admin/messages";
+import AdminProfile from "@/pages/admin/profile";
 import Billing from "@/pages/billing";
 import BillingCallback from "@/pages/billing-callback";
 import AdminUsers from "@/pages/admin-users";
@@ -73,11 +85,24 @@ function Router() {
       <Route path="/docs" component={Docs} />
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/account" component={AccountSettings} />
-      <Route path="/admin" component={Admin} />
+      <Route path="/admin" component={AdminIndex} />
+      <Route path="/admin/dashboard" component={AdminDashboard} />
+      <Route path="/admin/products" component={AdminProducts} />
+      <Route path="/admin/orders" component={AdminOrders} />
+      <Route path="/admin/customers" component={AdminCustomers} />
+      <Route path="/admin/inventory" component={AdminInventory} />
+      <Route path="/admin/promo-codes" component={AdminPromoCodes} />
+      <Route path="/admin/analytics" component={AdminAnalytics} />
+      <Route path="/admin/marketing" component={AdminMarketing} />
+      <Route path="/admin/notifications" component={AdminNotifications} />
+      <Route path="/admin/bills" component={AdminBills} />
+      <Route path="/admin/messages" component={AdminMessages} />
+      <Route path="/admin/profile" component={AdminProfile} />
+      <Route path="/admin/store-users" component={AdminUsers} />
+      <Route path="/admin/users" component={AdminUsers} />
       <Route path="/billing" component={Billing} />
       <Route path="/billing/callback" component={BillingCallback} />
       <Route path="/checkout" component={Checkout} />
-      <Route path="/admin/users" component={AdminUsers} />
       <Route component={NotFound} />
     </Switch>
   );
