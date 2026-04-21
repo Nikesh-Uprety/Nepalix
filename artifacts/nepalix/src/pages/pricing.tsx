@@ -1,9 +1,42 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Check, X, Zap, Rocket, Crown, Building2, Tag, Shield, ArrowRight, MessageCircle } from "lucide-react";
+import { Check, X, Sparkles, Zap, Rocket, Crown, Building2, Tag, Shield, ArrowRight, MessageCircle } from "lucide-react";
 import { GradientButton } from "@/components/ui-custom/GradientButton";
 
 const plans = [
+  {
+    name: "Base",
+    tagline: "Try NEPALIX Risk-Free",
+    hook: "Get online with the essentials",
+    icon: Sparkles,
+    color: "#22D3EE",
+    yearlyPrice: 9990,
+    monthlyPrice: 999,
+    popular: false,
+    cta: "Start With Base",
+    features: [
+      { label: "Orders per Month", value: "500" },
+      { label: "Products", value: "50" },
+      { label: "Staff Accounts", value: "1" },
+      { label: "Free Domain Connection", value: true },
+      { label: "Basic Analytics", value: true },
+      { label: "Light Inventory", value: true },
+      { label: "Online Store Customization", value: true },
+      { label: "Branding Tools", value: true },
+      { label: "Marketing Tools", value: true },
+      { label: "SMS Notifications", value: true },
+      { label: "Customer Care Tools", value: true },
+      { label: "Payment Gateway", value: false },
+      { label: "WhatsApp Support", value: false },
+      { label: "POS (Point of Sale)", value: false },
+    ],
+    bonuses: [
+      "Store setup checklist",
+      "3 starter themes",
+      "Email onboarding guide",
+    ],
+    worth: "Rs 18,000+ tools",
+  },
   {
     name: "Starter",
     tagline: "For New Online Sellers",
@@ -15,22 +48,26 @@ const plans = [
     popular: false,
     cta: "Start With Starter",
     features: [
-      { label: "Orders per Year", value: "1,000" },
+      { label: "Orders per Year", value: "10,000" },
       { label: "Products", value: "100" },
       { label: "Staff Accounts", value: "2" },
       { label: "Free Domain Connection", value: true },
       { label: "Basic Analytics", value: true },
-      { label: "Payment Gateway", value: true },
-      { label: "WhatsApp Support (7 days)", value: true },
+      { label: "Light Inventory", value: true },
+      { label: "Online Store Customization", value: true },
+      { label: "Branding Tools", value: true },
+      { label: "Marketing Tools", value: true },
+      { label: "SMS Notifications", value: true },
+      { label: "Customer Care Tools", value: true },
+      { label: "Payment Gateway", value: false },
+      { label: "WhatsApp Support", value: false },
       { label: "POS (Point of Sale)", value: false },
-      { label: "Advanced Inventory", value: false },
-      { label: "Abandoned Cart Recovery", value: false },
-      { label: "Multi-Location", value: false },
+      { label: "Inventory Platinum", value: false },
     ],
     bonuses: [
       "Store setup checklist",
       "5 high-converting themes",
-      "WhatsApp onboarding support",
+      "Email onboarding support",
     ],
     worth: "Rs 32,000+ tools",
   },
@@ -50,10 +87,16 @@ const plans = [
       { label: "Staff Accounts", value: "8" },
       { label: "Free Domain Connection", value: true },
       { label: "Advanced Analytics", value: true },
+      { label: "Light Inventory", value: true },
+      { label: "Inventory Platinum", value: true },
+      { label: "Online Store Customization", value: true },
+      { label: "Branding Tools", value: true },
+      { label: "Marketing Tools", value: true },
+      { label: "SMS Notifications", value: true },
+      { label: "Customer Care Tools", value: true },
       { label: "Payment + QR Integration", value: true },
-      { label: "Priority Email & Chat", value: true },
+      { label: "WhatsApp Support", value: true },
       { label: "POS (Point of Sale)", value: true },
-      { label: "Advanced Inventory", value: true },
       { label: "Abandoned Cart Recovery", value: true },
       { label: "Multi-Location (3)", value: true },
     ],
@@ -80,10 +123,16 @@ const plans = [
       { label: "Staff Accounts", value: "25" },
       { label: "Free Domain Connection", value: true },
       { label: "Advanced Analytics", value: true },
+      { label: "Light Inventory", value: true },
+      { label: "Inventory Platinum", value: true },
+      { label: "Online Store Customization", value: true },
+      { label: "Branding Tools", value: true },
+      { label: "Marketing Tools", value: true },
+      { label: "SMS Notifications", value: true },
+      { label: "Customer Care Tools", value: true },
       { label: "All Payment Methods", value: true },
       { label: "Priority Support", value: true },
       { label: "POS (Point of Sale)", value: true },
-      { label: "Advanced Automation", value: true },
       { label: "Funnel Builder", value: true },
       { label: "Upsell & Cross-sell System", value: true },
     ],
@@ -110,6 +159,13 @@ const plans = [
       { label: "Staff Accounts", value: "50" },
       { label: "Free Domain Connection", value: true },
       { label: "Enterprise Analytics", value: true },
+      { label: "Light Inventory", value: true },
+      { label: "Inventory Platinum", value: true },
+      { label: "Online Store Customization", value: true },
+      { label: "Branding Tools", value: true },
+      { label: "Marketing Tools", value: true },
+      { label: "SMS Notifications", value: true },
+      { label: "Customer Care Tools", value: true },
       { label: "All Payment Methods", value: true },
       { label: "Dedicated Support", value: true },
       { label: "Unlimited POS Terminals", value: true },
@@ -127,6 +183,7 @@ const plans = [
 ];
 
 const loyaltyData = [
+  { plan: "Base", y1: "9,990", y2: "~8,991", y3: "~7,493" },
   { plan: "Starter", y1: "18,000", y2: "~16,200", y3: "~13,500" },
   { plan: "Growth", y1: "28,000", y2: "~25,200", y3: "~21,000" },
   { plan: "Pro", y1: "39,000", y2: "~35,100", y3: "~29,250" },
@@ -280,7 +337,7 @@ export default function Pricing() {
             <p className="text-gray-400">Choose the plan that matches your business needs.</p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
             {plans.map((plan, i) => {
               const Icon = plan.icon;
               return (
