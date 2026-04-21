@@ -28,25 +28,25 @@ args = "API Server"
 name = "Start application"
 author = "agent"
 
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "PORT=5173 BASE_PATH=/ pnpm --filter @workspace/nepalix run dev"
-waitForPort = 5173
-
 [workflows.workflow.metadata]
 outputType = "webview"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "PORT=5173 BASE_PATH=/ corepack pnpm --filter @workspace/nepalix run dev"
+waitForPort = 5173
 
 [[workflows.workflow]]
 name = "API Server"
 author = "agent"
 
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "PORT=3001 pnpm --filter @workspace/api-server run dev"
-waitForPort = 3001
-
 [workflows.workflow.metadata]
 outputType = "console"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "PORT=3001 corepack pnpm --filter @workspace/api-server run dev"
+waitForPort = 3001
 
 [agent]
 stack = "PNPM_WORKSPACE"
