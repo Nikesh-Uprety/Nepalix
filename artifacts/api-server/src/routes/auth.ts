@@ -167,10 +167,33 @@ router.get("/me", authMiddleware, (req: AuthRequest, res: Response) => {
 
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
-const GOOGLE_REDIRECT_URI =
-  process.env.GOOGLE_REDIRECT_URI ??
-  "http://localhost:3000/api/auth/google/callback";
-const FRONTEND_URL = process.env.FRONTEND_URL ?? "http://localhost:5173";
+const isHostedRuntime =
+  process.env.NODE_ENV === "production" ||
+  process.env.RAILWAY_ENVIRONMENT !== undefined ||
+  process.env.VERCEL === "1";
+
+function getPublicUrlEnv(name: string, localFallback: string) {
+  const value = process.env[name]?.replace(/\/$/, "") || localFallback;
+  let parsed: URL;
+
+  try {
+    parsed = new URL(value);
+  } catch {
+    throw new Error(`${name} must be a valid absolute URL`);
+  }
+
+  if (isHostedRuntime && ["localhost", "127.0.0.1", "::1"].includes(parsed.hostname)) {
+    throw new Error(`${name} cannot point to localhost in a hosted environment`);
+  }
+
+  return value;
+}
+
+const GOOGLE_REDIRECT_URI = getPublicUrlEnv(
+  "GOOGLE_REDIRECT_URI",
+  "http://localhost:3000/api/auth/google/callback"
+);
+const FRONTEND_URL = getPublicUrlEnv("FRONTEND_URL", "http://localhost:5173");
 
 router.get("/google", (_req: Request, res: Response) => {
   if (!GOOGLE_CLIENT_ID) {
