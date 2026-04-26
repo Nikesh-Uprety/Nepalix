@@ -3,6 +3,12 @@
   "installCommand": "cd ../.. && pnpm install --filter @workspace/nepalix...",
   "buildCommand": "pnpm build",
   "outputDirectory": "dist",
+  "routes": [
+    {
+      "src": "/api/(?<path>.*)",
+      "dest": "https://neplix-production.up.railway.app/api/$path"
+    }
+  ],
   "rewrites": [
     {
       "source": "/(.*)",
