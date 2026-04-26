@@ -24,6 +24,8 @@ FROM node:22-alpine
 WORKDIR /app/artifacts/api-server
 
 COPY --from=builder /app/artifacts/api-server/dist ./dist
+COPY --from=builder /app/artifacts/api-server/node_modules ./node_modules
+COPY --from=builder /app/node_modules/.pnpm ./node_modules/.pnpm
 
 EXPOSE 10000
 CMD ["node", "--enable-source-maps", "./dist/index.mjs"]

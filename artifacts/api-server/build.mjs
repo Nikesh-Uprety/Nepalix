@@ -98,7 +98,7 @@ async function buildAll() {
       "playwright",
       "puppeteer",
       "puppeteer-core",
-      "electron",
+      "nodemailer",
     ],
     sourcemap: "linked",
     plugins: [
