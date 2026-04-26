@@ -95,6 +95,8 @@ export async function provisionStoreForUser(args: {
       billingCycle: "yearly",
       currentPeriodStart: new Date(),
     });
+  } else {
+    logger.warn({ storeId: store.id }, "Free plan not found, skipping subscription");
   }
 
   return { storeId: store.id, storeSlug: store.slug };

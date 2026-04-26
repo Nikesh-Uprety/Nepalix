@@ -199,22 +199,45 @@ router.post("/register", async (req: Request, res: Response) => {
 
 try {
         await createTrialSubscription(user.id);
+      } catch (e) {
+        logger.warn({ err: e, userId: user.id }, "Failed to create trial subscription");
+      }
+
+      try {
         await provisionStoreForUser({
           userId: user.id,
           firstName: user.firstName,
           lastName: user.lastName,
           email: user.email,
         });
+      } catch (e) {
+        logger.error({ err: e, userId: user.id }, "Failed to provision store - critical error");
+      }
+
+      const updatedUser = await db.select().from(usersTable).where(eq(usersTable.id, user.id)).limit(1);
+
+      if (!updatedUser[0]?.storeId || !updatedUser[0]?.activeStoreId) {
+        logger.error(
+          { userEmail: normalizedEmail, storeId: updatedUser[0]?.storeId, activeStoreId: updatedUser[0]?.activeStoreId },
+          "User still has no storeId after provisioning"
+        );
+        res.status(500).json({ error: "Failed to create store. Please contact support." });
+        return;
+      }
+
+      logger.info({ userId: updatedUser[0].id, storeId: updatedUser[0].storeId }, "User provisioned successfully");
+
+      try {
         await sendWelcomeEmail({ to: user.email, firstName: user.firstName });
-      } catch (err) {
-        logger.warn({ err, userId: user.id }, "Failed to bootstrap tenant resources for verified new user");
+      } catch (e) {
+        logger.warn({ err: e }, "Failed to send welcome email");
       }
 
       const token = randomBytes(32).toString("hex");
       const expiresAt = new Date(Date.now() + COOKIE_MAX_AGE);
       await db.insert(sessionsTable).values({ userId: user.id, token, expiresAt });
       setSessionCookie(res, token);
-      res.status(201).json({ user: toAuthUserResponse(user) });
+      res.status(201).json({ user: toAuthUserResponse(updatedUser[0] ?? user) });
       return;
     }
 
@@ -364,19 +387,31 @@ router.post("/register/verify", async (req: Request, res: Response) => {
 
 try {
         await createTrialSubscription(user.id);
+      } catch (e) {
+        logger.warn({ err: e, userId: user.id }, "Failed to create trial subscription");
+      }
+
+      try {
         await provisionStoreForUser({
           userId: user.id,
           firstName: user.firstName,
           lastName: user.lastName,
           email: user.email,
         });
+      } catch (e) {
+        logger.error({ err: e, userId: user.id }, "Failed to provision store for user - critical error");
+      }
+
+      const updatedUser = await db.select().from(usersTable).where(eq(usersTable.id, user.id)).limit(1);
+      if (!updatedUser[0]?.storeId || !updatedUser[0]?.activeStoreId) {
+        logger.error({ user: updatedUser[0] }, "User still has no store after provisioning");
+      }
+
+      try {
         await sendWelcomeEmail({ to: user.email, firstName: user.firstName });
-      } catch (err) {
-    logger.warn(
-      { err, userId: user.id },
-      "Failed to bootstrap tenant resources for verified new user"
-    );
-  }
+      } catch (e) {
+        logger.warn({ err: e }, "Failed to send welcome email");
+      }
 
   const token = randomBytes(32).toString("hex");
   const expiresAt = new Date(Date.now() + COOKIE_MAX_AGE);
@@ -670,6 +705,9 @@ router.post("/logout", authMiddleware, async (req: AuthRequest, res: Response) =
 
 router.get("/me", authMiddleware, (req: AuthRequest, res: Response) => {
   const user = req.user!;
+  if (!user.storeId && !user.activeStoreId) {
+    logger.warn({ userId: user.id, email: user.email }, "User has no storeId set");
+  }
   res.json({ user: toAuthUserResponse(user, req.session) });
 });
 
