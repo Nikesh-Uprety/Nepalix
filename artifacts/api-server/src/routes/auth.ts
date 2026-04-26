@@ -935,7 +935,7 @@ const GOOGLE_REDIRECT_URI = getPublicUrlEnv(
   "http://localhost:3000/api/auth/google/callback",
   { requiredForHosted: true }
 );
-const FRONTEND_URL = getPublicUrlEnv("FRONTEND_URL", "http://localhost:3000");
+const FRONTEND_URL = (getPublicUrlEnv("FRONTEND_URL", "http://localhost:3000") ?? "").replace(/\/$/, "") + "/";
 
 router.get("/google", (_req: Request, res: Response) => {
   if (!GOOGLE_CLIENT_ID || !GOOGLE_REDIRECT_URI) {
