@@ -85,3 +85,57 @@ export async function sendVerificationCodeEmail(input: {
   });
 }
 
+export async function sendWelcomeEmail(input: {
+  to: string;
+  firstName: string;
+}) {
+  if (!isEmailConfigured()) {
+    console.log(`[EMAIL SKIPPED] Welcome email for ${input.to}`);
+    return;
+  }
+  const transport = createTransport();
+  const from = fromAddress();
+  const subject = "Welcome to Nepalix!";
+  const text = [
+    `Hi ${input.firstName},`,
+    "",
+    "Welcome to Nepalix!",
+    "",
+    "Your account has been created successfully.",
+    "",
+    "Next steps:",
+    "1. Complete your store onboarding",
+    "2. Add your products",
+    "3. Customize your storefront",
+    "",
+    "Get started at: https://nepalix.vercel.app/onboarding",
+    "",
+    "Best regards,",
+    "The Nepalix Team",
+  ].join("\n");
+
+  const html = `
+    <div style="font-family: Inter, Arial, sans-serif; line-height: 1.5; color: #111827;">
+      <p>Hi ${input.firstName},</p>
+      <p>Welcome to <strong>Nepalix</strong>!</p>
+      <p>Your account has been created successfully.</p>
+      <h3>Next steps:</h3>
+      <ol>
+        <li>Complete your store onboarding</li>
+        <li>Add your products</li>
+        <li>Customize your storefront</li>
+      </ol>
+      <p><a href="https://nepalix.vercel.app/onboarding" style="display: inline-block; background: #06B6D4; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px;">Get Started</a></p>
+      <p style="margin-top: 24px;">Best regards,<br/>The Nepalix Team</p>
+    </div>
+  `;
+
+  await transport.sendMail({
+    from,
+    to: input.to,
+    subject,
+    text,
+    html,
+  });
+}
+

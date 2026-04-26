@@ -42,7 +42,7 @@ import { authMiddleware, type AuthRequest } from "../middlewares/auth.js";
 import { createTrialSubscription } from "./subscriptions.js";
 import { logger } from "../lib/logger.js";
 import { provisionStoreForUser } from "../lib/tenant.js";
-import { sendVerificationCodeEmail, isEmailConfigured } from "../lib/email.js";
+import { sendVerificationCodeEmail, sendWelcomeEmail, isEmailConfigured } from "../lib/email.js";
 
 const router: IRouter = Router();
 
@@ -197,7 +197,7 @@ router.post("/register", async (req: Request, res: Response) => {
           .where(eq(emailVerificationCodesTable.id, verification.id));
       }
 
-      try {
+try {
         await createTrialSubscription(user.id);
         await provisionStoreForUser({
           userId: user.id,
@@ -205,6 +205,7 @@ router.post("/register", async (req: Request, res: Response) => {
           lastName: user.lastName,
           email: user.email,
         });
+        await sendWelcomeEmail({ to: user.email, firstName: user.firstName });
       } catch (err) {
         logger.warn({ err, userId: user.id }, "Failed to bootstrap tenant resources for verified new user");
       }
@@ -361,15 +362,16 @@ router.post("/register/verify", async (req: Request, res: Response) => {
     .set({ consumedAt: new Date() })
     .where(eq(emailVerificationCodesTable.id, verification.id));
 
-  try {
-    await createTrialSubscription(user.id);
-    await provisionStoreForUser({
-      userId: user.id,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      email: user.email,
-    });
-  } catch (err) {
+try {
+        await createTrialSubscription(user.id);
+        await provisionStoreForUser({
+          userId: user.id,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          email: user.email,
+        });
+        await sendWelcomeEmail({ to: user.email, firstName: user.firstName });
+      } catch (err) {
     logger.warn(
       { err, userId: user.id },
       "Failed to bootstrap tenant resources for verified new user"
@@ -1040,7 +1042,7 @@ router.get("/google/callback", async (req: Request, res: Response) => {
     await db.insert(sessionsTable).values({ userId: user.id, token, expiresAt });
 
     setSessionCookie(res, token);
-    res.redirect(`${FRONTEND_URL ?? "/"}?google_auth=success`);
+    res.redirect(`${FRONTEND_URL ?? "/"}onboarding?google_auth=success`);
   } catch (_err) {
     res.redirect(`${FRONTEND_URL ?? "/"}?google_auth=error`);
   }
