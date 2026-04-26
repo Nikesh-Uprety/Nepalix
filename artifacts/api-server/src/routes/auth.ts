@@ -1045,7 +1045,7 @@ router.get("/google/callback", async (req: Request, res: Response) => {
     await db.insert(sessionsTable).values({ userId: user.id, token, expiresAt });
 
     setSessionCookie(res, token);
-    res.redirect(`${FRONTEND_URL ?? "/"}onboarding?google_auth=success`);
+    res.redirect(`${FRONTEND_URL ?? "/"}onboarding/?google_auth=success`);
   } catch (_err) {
     res.redirect(`${FRONTEND_URL ?? "/"}?google_auth=error`);
   }
