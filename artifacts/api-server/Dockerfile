@@ -21,11 +21,11 @@ RUN pnpm install --no-frozen-lockfile --filter @workspace/api-server...
 RUN pnpm --filter @workspace/api-server run build
 
 FROM node:22-alpine
-WORKDIR /app/artifacts/api-server
+WORKDIR /app
 
-COPY --from=builder /app/artifacts/api-server/dist ./dist
-COPY --from=builder /app/artifacts/api-server/node_modules ./node_modules
-COPY --from=builder /app/node_modules/.pnpm ./node_modules/.pnpm
+COPY --from=builder /app/artifacts/api-server/dist ./artifacts/api-server/dist
+COPY --from=builder /app/node_modules ./node_modules
 
 EXPOSE 10000
-CMD ["node", "--enable-source-maps", "./dist/index.mjs"]
+WORKDIR /app
+CMD ["node", "--enable-source-maps", "./artifacts/api-server/dist/index.mjs"]
