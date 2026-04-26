@@ -5,7 +5,7 @@
     "dockerfilePath": "artifacts/api-server/Dockerfile"
   },
   "deploy": {
-    "startCommand": "node --enable-source-maps ./dist/index.mjs",
+    "startCommand": "node --enable-source-maps ./artifacts/api-server/dist/index.mjs",
     "env": {
       "PORT": "10000",
       "DATABASE_PUBLIC_URL": "postgresql://neondb_owner:npg_UNZMsT1QE7KY@ep-floral-sea-a1yth453-pooler.ap-southeast-1.aws.neon.tech/nepalix?sslmode=require&channel_binding=disable",
