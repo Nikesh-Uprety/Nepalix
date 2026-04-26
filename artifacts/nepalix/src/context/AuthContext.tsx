@@ -6,7 +6,7 @@ import {
   useCallback,
   type ReactNode,
 } from "react";
-import { ApiError, api, type AuthStore, type AuthUser, type RegisterStartResult } from "@/lib/api";
+import { ApiError, api, storeSessionToken, clearSessionToken, type AuthStore, type AuthUser, type RegisterStartResult } from "@/lib/api";
 
 type AuthContextType = {
   user: AuthUser | null;
@@ -46,10 +46,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const googleAuth = params.get("google_auth");
-    if (googleAuth) {
+    const urlToken = params.get("token");
+    if (googleAuth || urlToken) {
       window.history.replaceState({}, "", window.location.pathname);
       if (googleAuth === "error") setGoogleAuthError(true);
     }
+    if (urlToken) storeSessionToken(urlToken);
     api.auth
       .me()
       .then(({ user }) => setUser(user))
@@ -58,7 +60,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const login = useCallback(async (email: string, password: string) => {
-    const { user } = await api.auth.login({ email, password });
+    const { user, token } = await api.auth.login({ email, password });
+    storeSessionToken(token);
     setUser(user);
     return user;
   }, []);
@@ -77,7 +80,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const verifyRegistration = useCallback(
     async (data: { email: string; code: string }) => {
-      const { user } = await api.auth.verifyRegistration(data);
+      const { user, token } = await api.auth.verifyRegistration(data);
+      storeSessionToken(token);
       setUser(user);
       return user;
     },
@@ -93,6 +97,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         throw error;
       }
     }
+    clearSessionToken();
     setUser(null);
   }, []);
 

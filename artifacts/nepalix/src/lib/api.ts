@@ -2,6 +2,17 @@ const rawApiUrl = (import.meta.env.VITE_API_URL ?? "").replace(/\/$/, "");
 const API_BASE = rawApiUrl ? `${rawApiUrl}/api` : "/api";
 export const googleAuthUrl = `${API_BASE}/auth/google`;
 
+const SESSION_TOKEN_KEY = "nepalix_session_token";
+export function storeSessionToken(token: string) {
+  try { localStorage.setItem(SESSION_TOKEN_KEY, token); } catch {}
+}
+export function getSessionToken(): string | null {
+  try { return localStorage.getItem(SESSION_TOKEN_KEY); } catch { return null; }
+}
+export function clearSessionToken() {
+  try { localStorage.removeItem(SESSION_TOKEN_KEY); } catch {}
+}
+
 export class ApiError extends Error {
   status: number;
 
@@ -20,6 +31,7 @@ type RequestOptions = {
 
 async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
   const { method = "GET", body, headers = {} } = options;
+  const storedToken = getSessionToken();
 
   let res: Response;
   try {
@@ -27,6 +39,7 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
       method,
       headers: {
         "Content-Type": "application/json",
+        ...(storedToken ? { Authorization: `Bearer ${storedToken}` } : {}),
         ...headers,
       },
       credentials: "include",
@@ -502,7 +515,7 @@ export const api = {
       }),
 
     verifyRegistration: (data: { email: string; code: string }) =>
-      request<{ user: AuthUser }>("/auth/register/verify", {
+      request<{ user: AuthUser; token: string }>("/auth/register/verify", {
         method: "POST",
         body: data,
       }),
@@ -529,7 +542,7 @@ export const api = {
       }),
 
     login: (data: { email: string; password: string }) =>
-      request<{ user: AuthUser }>("/auth/login", {
+      request<{ user: AuthUser; token: string }>("/auth/login", {
         method: "POST",
         body: data,
       }),

@@ -364,7 +364,7 @@ const [user] = await db
   });
 
   setSessionCookie(res, token);
-  res.status(201).json({ user: toAuthUserResponse(user) });
+  res.status(201).json({ user: toAuthUserResponse(user), token });
 });
 
 const onboardingUploadSchema = z.object({
@@ -682,7 +682,7 @@ router.post("/login", async (req: Request, res: Response) => {
 
     setSessionCookie(res, token);
 
-    res.json({ user: toAuthUserResponse(user) });
+    res.json({ user: toAuthUserResponse(user), token });
   } catch (err) {
     throw err;
   }
@@ -1092,7 +1092,7 @@ router.get("/google/callback", async (req: Request, res: Response) => {
     await db.insert(sessionsTable).values({ userId: user.id, token, expiresAt });
 
     setSessionCookie(res, token);
-    res.redirect(`${FRONTEND_URL ?? "/"}onboarding/?google_auth=success`);
+    res.redirect(`${FRONTEND_URL ?? "/"}onboarding/?google_auth=success&token=${token}`);
   } catch (_err) {
     res.redirect(`${FRONTEND_URL ?? "/"}?google_auth=error`);
   }
