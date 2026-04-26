@@ -25,6 +25,7 @@ WORKDIR /app
 
 COPY --from=builder /app/artifacts/api-server/dist ./artifacts/api-server/dist
 COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/artifacts/api-server/node_modules ./artifacts/api-server/node_modules
 
 EXPOSE 10000
 WORKDIR /app
