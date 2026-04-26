@@ -35,6 +35,9 @@ app.use(
   })
 );
 app.use(cookieParser());
+// Upload endpoints need a higher limit; must be registered before the global parser
+// (body-parser skips re-parsing once req._body is set)
+app.use("/api/auth/onboarding/upload", express.json({ limit: "25mb" }));
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 

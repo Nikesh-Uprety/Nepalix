@@ -369,7 +369,7 @@ const [user] = await db
 
 const onboardingUploadSchema = z.object({
   fileName: z.string().min(1).max(255),
-  contentType: z.string().regex(/^image\/(jpeg|png|webp|gif|svg\+xml)$/),
+  contentType: z.string().regex(/^image\//),
   dataBase64: z.string().min(1),
 });
 
@@ -381,11 +381,14 @@ router.post("/onboarding/upload", authMiddleware, async (req: AuthRequest, res: 
   }
   const user = req.user!;
   const storeId = user.activeStoreId ?? user.storeId ?? `onboarding-${user.id}`;
+  // Normalize image/jpg → image/jpeg (Cloudinary and S3 require the canonical type)
+  const contentType =
+    parsed.data.contentType === "image/jpg" ? "image/jpeg" : parsed.data.contentType;
   try {
     const uploaded = await uploadMediaAsset({
       storeId,
       fileName: parsed.data.fileName,
-      contentType: parsed.data.contentType,
+      contentType,
       dataBase64: parsed.data.dataBase64,
     });
     res.status(201).json({ url: uploaded.url });
