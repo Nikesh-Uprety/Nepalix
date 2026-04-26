@@ -53,7 +53,7 @@ export async function provisionStoreForUser(args: {
         legalName: storeName,
         createdByUserId: args.userId,
         planCode: "free",
-        settings: { currency: "NPR", locale: "en-NP", timezone: "Asia/Kathmandu" },
+        settings: {},
       })
       .returning({ id: storesTable.id, slug: storesTable.slug });
 
@@ -68,7 +68,7 @@ export async function provisionStoreForUser(args: {
 
     logger.info({ storeId: store.id, userId: args.userId }, "Updating user with storeId");
 
-    await db
+    const updateResult = await db
       .update(usersTable)
       .set({
         storeId: store.id,
@@ -77,11 +77,25 @@ export async function provisionStoreForUser(args: {
       })
       .where(eq(usersTable.id, args.userId));
 
-    logger.info({ storeId: store.id, userId: args.userId }, "User updated with storeId - provisioning complete");
+    logger.info({ updateResult }, "User update result");
+
+    const [checkUser] = await db
+      .select({ storeId: usersTable.storeId, activeStoreId: usersTable.activeStoreId })
+      .from(usersTable)
+      .where(eq(usersTable.id, args.userId))
+      .limit(1);
+
+    logger.info({ checkUser }, "Verified user storeIds");
+
+    if (!checkUser?.storeId) {
+      throw new Error(`Store not linked to user after update - userId: ${args.userId}`);
+    }
+
+    logger.info({ storeId: store.id, userId: args.userId }, "Provisioning complete");
 
     return { storeId: store.id, storeSlug: store.slug };
   } catch (err) {
-    logger.error({ err, userId: args.userId }, "Failed to provision store");
+    logger.error({ err, userId: args.userId, errMessage: err?.message, errStack: err?.stack }, "Failed to provision store");
     throw err;
   }
 }

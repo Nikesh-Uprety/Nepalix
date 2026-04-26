@@ -405,6 +405,8 @@ try {
       const updatedUser = await db.select().from(usersTable).where(eq(usersTable.id, user.id)).limit(1);
       if (!updatedUser[0]?.storeId || !updatedUser[0]?.activeStoreId) {
         logger.error({ user: updatedUser[0] }, "User still has no store after provisioning");
+      } else {
+        logger.info({ userId: updatedUser[0].id, storeId: updatedUser[0].storeId }, "User provisioned successfully");
       }
 
       try {
@@ -413,17 +415,17 @@ try {
         logger.warn({ err: e }, "Failed to send welcome email");
       }
 
-  const token = randomBytes(32).toString("hex");
-  const expiresAt = new Date(Date.now() + COOKIE_MAX_AGE);
+      const token = randomBytes(32).toString("hex");
+      const expiresAt = new Date(Date.now() + COOKIE_MAX_AGE);
 
-  await db.insert(sessionsTable).values({
-    userId: user.id,
-    token,
-    expiresAt,
-  });
+      await db.insert(sessionsTable).values({
+        userId: user.id,
+        token,
+        expiresAt,
+      });
 
-  setSessionCookie(res, token);
-  res.status(201).json({ user: toAuthUserResponse(user) });
+      setSessionCookie(res, token);
+      res.status(201).json({ user: toAuthUserResponse(updatedUser[0] ?? user) });
 });
 
 const onboardingSchema = z.object({
