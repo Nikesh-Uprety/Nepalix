@@ -26,8 +26,9 @@ export const productVariantsTable = pgTable(
     sku: text("sku"),
     title: text("title").notNull(),
     attributes: jsonb("attributes").$type<Record<string, string>>().notNull().default({}),
+    position: integer("position").notNull().default(0),
     price: integer("price").notNull().default(0),
-    comparePrice: integer("compare_price"),
+    compareAtPrice: integer("compare_price"),
     costPrice: integer("cost_price"),
     currency: text("currency").notNull().default("NPR"),
     stock: integer("stock").notNull().default(0),
@@ -40,6 +41,11 @@ export const productVariantsTable = pgTable(
     storeProductIdx: index("product_variants_store_product_idx").on(
       table.storeId,
       table.productId,
+    ),
+    storeProductPositionIdx: index("product_variants_store_product_position_idx").on(
+      table.storeId,
+      table.productId,
+      table.position,
     ),
     storeStockIdx: index("product_variants_store_stock_idx").on(
       table.storeId,
@@ -62,9 +68,12 @@ export const productImagesTable = pgTable(
     productId: uuid("product_id")
       .notNull()
       .references(() => productsTable.id, { onDelete: "cascade" }),
+    variantId: uuid("variant_id").references(() => productVariantsTable.id, {
+      onDelete: "set null",
+    }),
     url: text("url").notNull(),
-    alt: text("alt"),
-    sortOrder: integer("sort_order").notNull().default(0),
+    altText: text("alt"),
+    position: integer("sort_order").notNull().default(0),
     isPrimary: boolean("is_primary").notNull().default(false),
     createdAt: timestamp("created_at").notNull().defaultNow(),
     updatedAt: timestamp("updated_at").notNull().defaultNow(),
@@ -73,7 +82,11 @@ export const productImagesTable = pgTable(
     storeProductSortIdx: index("product_images_store_product_sort_idx").on(
       table.storeId,
       table.productId,
-      table.sortOrder,
+      table.position,
+    ),
+    storeVariantIdx: index("product_images_store_variant_idx").on(
+      table.storeId,
+      table.variantId,
     ),
   }),
 );

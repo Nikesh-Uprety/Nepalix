@@ -70,6 +70,50 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
   return data as T;
 }
 
+async function requestFormData<T>(
+  path: string,
+  body: FormData,
+  options: Omit<RequestOptions, "body"> = {},
+): Promise<T> {
+  const { method = "POST", headers = {} } = options;
+  const storedToken = getSessionToken();
+
+  let res: Response;
+  try {
+    res = await fetch(`${API_BASE}${path}`, {
+      method,
+      headers: {
+        ...(storedToken ? { Authorization: `Bearer ${storedToken}` } : {}),
+        ...headers,
+      },
+      credentials: "include",
+      body,
+    });
+  } catch {
+    throw new Error("Network error — please check your connection and try again");
+  }
+
+  const text = await res.text();
+  let data: unknown = {};
+  if (text) {
+    try {
+      data = JSON.parse(text);
+    } catch {
+      throw new Error(`Unexpected server response (${res.status})`);
+    }
+  }
+
+  if (!res.ok) {
+    const err = data as Record<string, unknown>;
+    throw new ApiError(
+      typeof err?.error === "string" ? err.error : `Request failed: ${res.status}`,
+      res.status,
+    );
+  }
+
+  return data as T;
+}
+
 export type AuthUser = {
   id: string;
   email: string;
@@ -185,6 +229,8 @@ export type ManagedStore = {
   createdAt: string;
 };
 
+export type AdminProductStatus = "active" | "draft" | "archived";
+
 export type AdminProduct = {
   id: string;
   storeId: string;
@@ -193,14 +239,97 @@ export type AdminProduct = {
   description: string | null;
   sku: string | null;
   price: number;
+  compareAtPrice?: number | null;
   comparePrice: number | null;
+  costPrice?: number | null;
   currency: string;
   stock: number;
+  totalStock?: number;
   images: string[];
-  status: string;
+  categoryId?: string | null;
+  category?: AdminProductCategory | null;
+  firstImage?: AdminProductImage | null;
+  variantCount?: number;
+  weight?: number | null;
+  tags?: string[];
+  seoTitle?: string | null;
+  seoDescription?: string | null;
+  featuredImageUrl?: string | null;
+  status: AdminProductStatus | string;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
+};
+
+export type AdminProductVariant = {
+  id: string;
+  storeId: string;
+  productId: string;
+  sku: string | null;
+  title: string;
+  attributes: Record<string, string>;
+  position: number;
+  price: number;
+  compareAtPrice: number | null;
+  comparePrice: number | null;
+  costPrice: number | null;
+  currency: string;
+  stock: number;
+  lowStockThreshold: number;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type AdminProductImage = {
+  id: string;
+  storeId: string;
+  productId: string;
+  variantId: string | null;
+  url: string;
+  altText: string | null;
+  alt: string | null;
+  position: number;
+  sortOrder: number;
+  isPrimary: boolean;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type AdminProductCategory = {
+  id: string;
+  storeId: string;
+  name: string;
+  slug: string;
+  parentId: string | null;
+  imageUrl: string | null;
+  position: number;
+  createdAt: string;
+  updatedAt: string;
+  children?: AdminProductCategory[];
+};
+
+export type AdminProductsListResponse = {
+  products: AdminProduct[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+};
+
+export type AdminProductDetailResponse = {
+  product: AdminProduct;
+  variants: AdminProductVariant[];
+  images: AdminProductImage[];
+  category: AdminProductCategory | null;
+};
+
+export type AdminProductStats = {
+  total: number;
+  active: number;
+  draft: number;
+  archived: number;
+  outOfStock: number;
 };
 
 export type AdminProductInput = {
@@ -209,13 +338,50 @@ export type AdminProductInput = {
   description?: string;
   sku?: string;
   price?: number;
+  compareAtPrice?: number;
   comparePrice?: number;
+  costPrice?: number;
   currency?: string;
   stock?: number;
-  images?: string[];
-  status?: "active" | "draft" | "archived";
+  categoryId?: string | null;
+  weight?: number;
+  tags?: string[];
+  seoTitle?: string;
+  seoDescription?: string;
+  featuredImageUrl?: string | null;
+  images?: string[] | Array<{
+    url: string;
+    altText?: string;
+    position?: number;
+    isPrimary?: boolean;
+    variantId?: string | null;
+  }>;
+  productImages?: Array<{
+    url: string;
+    altText?: string;
+    position?: number;
+    isPrimary?: boolean;
+    variantId?: string | null;
+  }>;
+  variants?: Array<{
+    sku?: string;
+    title?: string;
+    attributes?: Record<string, string>;
+    position?: number;
+    price?: number;
+    compareAtPrice?: number;
+    comparePrice?: number;
+    costPrice?: number;
+    currency?: string;
+    stock?: number;
+    lowStockThreshold?: number;
+    isActive?: boolean;
+  }>;
+  status?: AdminProductStatus;
   isActive?: boolean;
 };
+
+export type AdminProductVariantInput = NonNullable<AdminProductInput["variants"]>[number];
 
 export type AdminOrderListItem = {
   id: string;
@@ -746,22 +912,147 @@ export const api = {
     featureFlags: () => request<{ flags: AdminFeatureFlags }>("/admin/feature-flags"),
 
     products: {
-      list: (params: { q?: string; status?: string; limit?: number; offset?: number } = {}) => {
+      list: (
+        params: {
+          q?: string;
+          search?: string;
+          status?: string;
+          categoryId?: string;
+          minPrice?: number;
+          maxPrice?: number;
+          inStock?: boolean;
+          sortBy?: string;
+          sortDir?: "asc" | "desc";
+          page?: number;
+          limit?: number;
+          offset?: number;
+        } = {},
+      ) => {
         const q = new URLSearchParams();
         if (params.q) q.set("q", params.q);
+        if (params.search) q.set("search", params.search);
         if (params.status) q.set("status", params.status);
+        if (params.categoryId) q.set("categoryId", params.categoryId);
+        if (params.minPrice !== undefined) q.set("minPrice", String(params.minPrice));
+        if (params.maxPrice !== undefined) q.set("maxPrice", String(params.maxPrice));
+        if (params.inStock !== undefined) q.set("inStock", String(params.inStock));
+        if (params.sortBy) q.set("sortBy", params.sortBy);
+        if (params.sortDir) q.set("sortDir", params.sortDir);
+        if (params.page !== undefined) q.set("page", String(params.page));
         if (params.limit !== undefined) q.set("limit", String(params.limit));
         if (params.offset !== undefined) q.set("offset", String(params.offset));
         const qs = q.toString();
-        return request<{ products: AdminProduct[]; total: number }>(`/admin/products${qs ? `?${qs}` : ""}`);
+        return request<AdminProductsListResponse>(`/admin/products${qs ? `?${qs}` : ""}`);
       },
-      get: (id: string) => request<{ product: AdminProduct }>(`/admin/products/${id}`),
+      stats: () => request<{ stats: AdminProductStats }>("/admin/products/stats"),
+      get: (id: string) => request<AdminProductDetailResponse>(`/admin/products/${id}`),
       create: (input: AdminProductInput) =>
-        request<{ product: AdminProduct }>("/admin/products", { method: "POST", body: input }),
+        request<AdminProductDetailResponse>("/admin/products", { method: "POST", body: input }),
       update: (id: string, input: Partial<AdminProductInput>) =>
-        request<{ product: AdminProduct }>(`/admin/products/${id}`, { method: "PATCH", body: input }),
+        request<AdminProductDetailResponse>(`/admin/products/${id}`, { method: "PATCH", body: input }),
+      replace: (id: string, input: Partial<AdminProductInput>) =>
+        request<AdminProductDetailResponse>(`/admin/products/${id}`, { method: "PUT", body: input }),
+      bulk: (payload: {
+        action: "archive" | "activate" | "delete" | "updateCategory";
+        ids: string[];
+        payload?: Record<string, unknown>;
+      }) =>
+        request<{ success: boolean; updated: number; products: AdminProduct[] }>(
+          "/admin/products/bulk",
+          { method: "POST", body: payload },
+        ),
       remove: (id: string) =>
         request<{ success: boolean }>(`/admin/products/${id}`, { method: "DELETE" }),
+      listVariants: (productId: string) =>
+        request<{ variants: AdminProductVariant[] }>(`/admin/products/${productId}/variants`),
+      createVariant: (
+        productId: string,
+        input: Partial<AdminProductVariantInput>,
+      ) =>
+        request<{ variant: AdminProductVariant }>(`/admin/products/${productId}/variants`, {
+          method: "POST",
+          body: input,
+        }),
+      updateVariant: (
+        productId: string,
+        variantId: string,
+        input: Partial<AdminProductVariantInput>,
+      ) =>
+        request<{ variant: AdminProductVariant }>(
+          `/admin/products/${productId}/variants/${variantId}`,
+          { method: "PUT", body: input },
+        ),
+      removeVariant: (productId: string, variantId: string) =>
+        request<{ success: boolean }>(`/admin/products/${productId}/variants/${variantId}`, {
+          method: "DELETE",
+        }),
+      listImages: (productId: string) =>
+        request<{ images: AdminProductImage[] }>(`/admin/products/${productId}/images`),
+      createImage: (productId: string, input: FormData | {
+        url: string;
+        altText?: string;
+        position?: number;
+        isPrimary?: boolean;
+        variantId?: string | null;
+      }) =>
+        input instanceof FormData
+          ? requestFormData<{ image: AdminProductImage }>(
+              `/admin/products/${productId}/images`,
+              input,
+            )
+          : request<{ image: AdminProductImage }>(`/admin/products/${productId}/images`, {
+              method: "POST",
+              body: input,
+            }),
+      updateImage: (
+        productId: string,
+        imageId: string,
+        input: {
+          url?: string;
+          altText?: string;
+          position?: number;
+          isPrimary?: boolean;
+          variantId?: string | null;
+        },
+      ) =>
+        request<{ image: AdminProductImage }>(
+          `/admin/products/${productId}/images/${imageId}`,
+          { method: "PUT", body: input },
+        ),
+      removeImage: (productId: string, imageId: string) =>
+        request<{ success: boolean }>(`/admin/products/${productId}/images/${imageId}`, {
+          method: "DELETE",
+        }),
+    },
+    categories: {
+      list: () => request<{ categories: AdminProductCategory[] }>("/admin/categories"),
+      create: (input: {
+        name: string;
+        slug?: string;
+        parentId?: string | null;
+        imageUrl?: string | null;
+        position?: number;
+      }) =>
+        request<{ category: AdminProductCategory }>("/admin/categories", {
+          method: "POST",
+          body: input,
+        }),
+      update: (
+        id: string,
+        input: Partial<{
+          name: string;
+          slug: string;
+          parentId: string | null;
+          imageUrl: string | null;
+          position: number;
+        }>,
+      ) =>
+        request<{ category: AdminProductCategory }>(`/admin/categories/${id}`, {
+          method: "PUT",
+          body: input,
+        }),
+      remove: (id: string) =>
+        request<{ success: boolean }>(`/admin/categories/${id}`, { method: "DELETE" }),
     },
 
     orders: {

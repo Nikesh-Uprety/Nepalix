@@ -7,6 +7,7 @@ export * from "./contact-messages";
 export * from "./plans";
 export * from "./subscriptions";
 export * from "./payments";
+export * from "./categories";
 export * from "./products";
 export * from "./product-variants";
 export * from "./customers";

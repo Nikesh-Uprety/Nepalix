@@ -95,7 +95,16 @@ export async function provisionStoreForUser(args: {
 
     return { storeId: store.id, storeSlug: store.slug };
   } catch (err) {
-    logger.error({ err, userId: args.userId, errMessage: err?.message, errStack: err?.stack }, "Failed to provision store");
+    const error = err instanceof Error ? err : null;
+    logger.error(
+      {
+        err,
+        userId: args.userId,
+        errMessage: error?.message,
+        errStack: error?.stack,
+      },
+      "Failed to provision store",
+    );
     throw err;
   }
 }

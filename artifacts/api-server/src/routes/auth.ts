@@ -545,8 +545,8 @@ router.post("/onboarding/complete", authMiddleware, async (req: AuthRequest, res
         storeId,
         productId: product.id,
         url,
-        alt: `${primaryProductName} image ${idx + 1}`,
-        sortOrder: idx,
+        altText: `${primaryProductName} image ${idx + 1}`,
+        position: idx,
         isPrimary: idx === 0,
       })),
     );
@@ -637,7 +637,7 @@ router.post("/onboarding/complete", authMiddleware, async (req: AuthRequest, res
   }
 
   res.json({
-    user: toAuthUserResponse(updatedUser, req.session),
+    user: toAuthUserResponseWithSession(updatedUser, req.session),
     store: { id: store.id, slug: store.slug, name: store.name },
     page: { id: page.id, slug: page.slug, isPublished: page.isPublished },
     generatedProductId: product.id,
@@ -720,7 +720,7 @@ router.get("/me", authMiddleware, (req: AuthRequest, res: Response) => {
   if (!user.storeId && !user.activeStoreId) {
     logger.warn({ userId: user.id, email: user.email }, "User has no storeId set");
   }
-  res.json({ user: toAuthUserResponse(user, req.session) });
+  res.json({ user: toAuthUserResponseWithSession(user, req.session) });
 });
 
 router.get("/stores", authMiddleware, async (req: AuthRequest, res: Response) => {
@@ -789,7 +789,7 @@ router.post("/active-store", authMiddleware, async (req: AuthRequest, res: Respo
     .where(eq(usersTable.id, req.user!.id))
     .returning();
 
-  res.json({ user: toAuthUserResponse(user, req.session) });
+  res.json({ user: toAuthUserResponseWithSession(user, req.session) });
 });
 
 router.post("/impersonation/start", authMiddleware, async (req: AuthRequest, res: Response) => {
@@ -886,7 +886,7 @@ router.post("/impersonation/start", authMiddleware, async (req: AuthRequest, res
     maxAge: IMPERSONATION_MAX_AGE,
     path: "/",
   });
-  res.json({ user: toAuthUserResponse(targetUser, session) });
+  res.json({ user: toAuthUserResponseWithSession(targetUser, session) });
 });
 
 router.post("/impersonation/stop", authMiddleware, async (req: AuthRequest, res: Response) => {
@@ -948,7 +948,7 @@ router.post("/impersonation/stop", authMiddleware, async (req: AuthRequest, res:
     res.status(404).json({ error: "Impersonator user not found" });
     return;
   }
-  res.json({ user: toAuthUserResponse(actorUser, originalSession) });
+  res.json({ user: toAuthUserResponseWithSession(actorUser, originalSession) });
 });
 
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
