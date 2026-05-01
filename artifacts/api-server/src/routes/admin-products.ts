@@ -186,6 +186,114 @@ const productSelect = {
   categoryUpdatedAt: categoriesTable.updatedAt,
 };
 
+type LegacyProductRow = {
+  id: string;
+  storeId: string;
+  name: string;
+  slug: string | null;
+  description: string | null;
+  sku: string | null;
+  price: number;
+  comparePrice: number | null;
+  currency: string;
+  stock: number;
+  images: unknown;
+  status: string;
+  isActive: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+function isProductsCompatibilityError(error: unknown) {
+  const message = error instanceof Error ? error.message : String(error);
+  return (
+    message.includes('relation "categories" does not exist') ||
+    message.includes('relation "product_variants" does not exist') ||
+    message.includes('relation "product_images" does not exist') ||
+    message.includes('column "total_stock" does not exist') ||
+    message.includes('column "cost_price" does not exist') ||
+    message.includes('column "category_id" does not exist') ||
+    message.includes('column "weight" does not exist') ||
+    message.includes('column "tags" does not exist') ||
+    message.includes('column "seo_title" does not exist') ||
+    message.includes('column "seo_description" does not exist') ||
+    message.includes('column "featured_image_url" does not exist')
+  );
+}
+
+function normalizeLegacyImageUrls(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  return value.filter((item): item is string => typeof item === "string");
+}
+
+function buildLegacyFirstImage(
+  product: LegacyProductRow,
+  image: ProductImage | null,
+) {
+  if (image) {
+    return serializeImage(image);
+  }
+
+  const [firstUrl] = normalizeLegacyImageUrls(product.images);
+  if (!firstUrl) return null;
+
+  return {
+    id: `legacy-${product.id}-0`,
+    storeId: product.storeId,
+    productId: product.id,
+    variantId: null,
+    url: firstUrl,
+    altText: null,
+    alt: null,
+    position: 0,
+    sortOrder: 0,
+    isPrimary: true,
+    createdAt: product.createdAt,
+    updatedAt: product.updatedAt,
+  };
+}
+
+function serializeLegacyProduct(
+  product: LegacyProductRow,
+  extras: {
+    firstImage?: ProductImage | null;
+    variantCount?: number;
+    totalStock?: number;
+  } = {},
+) {
+  const imageUrls = normalizeLegacyImageUrls(product.images);
+  const firstImage = buildLegacyFirstImage(product, extras.firstImage ?? null);
+  return {
+    id: product.id,
+    storeId: product.storeId,
+    name: product.name,
+    slug: product.slug,
+    description: product.description,
+    sku: product.sku,
+    price: product.price,
+    compareAtPrice: product.comparePrice ?? null,
+    comparePrice: product.comparePrice ?? null,
+    costPrice: null,
+    currency: product.currency,
+    stock: product.stock,
+    totalStock: extras.totalStock ?? product.stock,
+    images: imageUrls,
+    categoryId: null,
+    category: null,
+    firstImage,
+    variantCount: extras.variantCount ?? 0,
+    weight: null,
+    tags: [],
+    seoTitle: null,
+    seoDescription: null,
+    featuredImageUrl: firstImage?.url ?? null,
+    status: product.status,
+    isActive: product.isActive,
+    createdAt: product.createdAt,
+    updatedAt: product.updatedAt,
+  };
+}
+
 function parseBooleanInput(value: unknown): boolean | undefined {
   if (typeof value === "boolean") return value;
   if (typeof value === "number") return value !== 0;
@@ -424,6 +532,97 @@ function serializeProduct(
     variantCount: extras.variantCount ?? 0,
     totalStock: extras.totalStock ?? product.totalStock ?? product.stock,
   };
+}
+
+async function loadLegacyProductsSnapshot(storeId: string) {
+  const result = await db.execute(sql<LegacyProductRow>`
+    select
+      "id",
+      "store_id" as "storeId",
+      "name",
+      "slug",
+      "description",
+      "sku",
+      "price",
+      "compare_price" as "comparePrice",
+      "currency",
+      "stock",
+      "images",
+      "status",
+      "is_active" as "isActive",
+      "created_at" as "createdAt",
+      "updated_at" as "updatedAt"
+    from "products"
+    where "store_id" = ${storeId}
+  `);
+
+  return result.rows as LegacyProductRow[];
+}
+
+async function loadLegacyFirstImageMap(storeId: string, productIds: string[]) {
+  if (productIds.length === 0) return new Map<string, ProductImage>();
+
+  try {
+    const images = await db
+      .select()
+      .from(productImagesTable)
+      .where(
+        and(
+          eq(productImagesTable.storeId, storeId),
+          inArray(productImagesTable.productId, productIds),
+        ),
+      )
+      .orderBy(
+        asc(productImagesTable.productId),
+        desc(productImagesTable.isPrimary),
+        asc(productImagesTable.position),
+        asc(productImagesTable.createdAt),
+      );
+
+    const firstImageByProductId = new Map<string, ProductImage>();
+    for (const image of images) {
+      if (!firstImageByProductId.has(image.productId)) {
+        firstImageByProductId.set(image.productId, image);
+      }
+    }
+    return firstImageByProductId;
+  } catch (error) {
+    if (!isProductsCompatibilityError(error)) throw error;
+    return new Map<string, ProductImage>();
+  }
+}
+
+async function loadLegacyVariantStatsMap(storeId: string, productIds: string[]) {
+  if (productIds.length === 0) {
+    return new Map<string, { variantCount: number; totalStock: number }>();
+  }
+
+  try {
+    const counts = await db
+      .select({
+        productId: productVariantsTable.productId,
+        variantCount: sql<number>`count(*)::int`,
+        totalStock: sql<number>`coalesce(sum(${productVariantsTable.stock}), 0)::int`,
+      })
+      .from(productVariantsTable)
+      .where(
+        and(
+          eq(productVariantsTable.storeId, storeId),
+          inArray(productVariantsTable.productId, productIds),
+        ),
+      )
+      .groupBy(productVariantsTable.productId);
+
+    return new Map(
+      counts.map((item) => [
+        item.productId,
+        { variantCount: item.variantCount, totalStock: item.totalStock },
+      ]),
+    );
+  } catch (error) {
+    if (!isProductsCompatibilityError(error)) throw error;
+    return new Map<string, { variantCount: number; totalStock: number }>();
+  }
 }
 
 function resolveProductOrder(
@@ -677,18 +876,33 @@ async function parseImageUploadRequest(req: Request, res: Response) {
 
 router.get("/stats", async (req: TenantRequest, res: Response) => {
   const storeId = req.tenant!.storeId;
-  const [stats] = await db
-    .select({
-      total: sql<number>`count(*)::int`,
-      active: sql<number>`count(*) filter (where ${productsTable.status} = 'active')::int`,
-      draft: sql<number>`count(*) filter (where ${productsTable.status} = 'draft')::int`,
-      archived: sql<number>`count(*) filter (where ${productsTable.status} = 'archived')::int`,
-      outOfStock: sql<number>`count(*) filter (where coalesce(${productsTable.totalStock}, ${productsTable.stock}, 0) <= 0)::int`,
-    })
-    .from(productsTable)
-    .where(eq(productsTable.storeId, storeId));
+  try {
+    const [stats] = await db
+      .select({
+        total: sql<number>`count(*)::int`,
+        active: sql<number>`count(*) filter (where ${productsTable.status} = 'active')::int`,
+        draft: sql<number>`count(*) filter (where ${productsTable.status} = 'draft')::int`,
+        archived: sql<number>`count(*) filter (where ${productsTable.status} = 'archived')::int`,
+        outOfStock: sql<number>`count(*) filter (where coalesce(${productsTable.totalStock}, ${productsTable.stock}, 0) <= 0)::int`,
+      })
+      .from(productsTable)
+      .where(eq(productsTable.storeId, storeId));
 
-  res.json({ stats });
+    res.json({ stats });
+  } catch (error) {
+    if (!isProductsCompatibilityError(error)) throw error;
+
+    const products = await loadLegacyProductsSnapshot(storeId);
+    const stats = {
+      total: products.length,
+      active: products.filter((product) => product.status === "active").length,
+      draft: products.filter((product) => product.status === "draft").length,
+      archived: products.filter((product) => product.status === "archived").length,
+      outOfStock: products.filter((product) => product.stock <= 0).length,
+    };
+
+    res.json({ stats, compatibilityMode: true });
+  }
 });
 
 router.get("/", async (req: TenantRequest, res: Response) => {
@@ -716,143 +930,274 @@ router.get("/", async (req: TenantRequest, res: Response) => {
 
   const resolvedOffset = typeof offset === "number" ? offset : (page - 1) * limit;
   const searchTerm = search ?? q;
-  const filters = [eq(productsTable.storeId, storeId)];
+  try {
+    const filters = [eq(productsTable.storeId, storeId)];
 
-  if (searchTerm) {
-    const pattern = `%${searchTerm}%`;
-    filters.push(
-      or(
-        ilike(productsTable.name, pattern),
-        ilike(productsTable.slug, pattern),
-        ilike(productsTable.sku, pattern),
-        ilike(productsTable.description, pattern),
-      )!,
-    );
-  }
-
-  if (categoryId) {
-    filters.push(eq(productsTable.categoryId, categoryId));
-  }
-
-  if (status && status !== "all") {
-    filters.push(eq(productsTable.status, status));
-  }
-
-  if (typeof minPrice === "number") {
-    filters.push(gte(productsTable.price, minPrice));
-  }
-
-  if (typeof maxPrice === "number") {
-    filters.push(lte(productsTable.price, maxPrice));
-  }
-
-  if (inStock === true) {
-    filters.push(gte(productsTable.totalStock, 1));
-  }
-
-  if (inStock === false) {
-    filters.push(lte(productsTable.totalStock, 0));
-  }
-
-  const where = and(...filters);
-  const rows = await db
-    .select(productSelect)
-    .from(productsTable)
-    .leftJoin(
-      categoriesTable,
-      and(
-        eq(categoriesTable.id, productsTable.categoryId),
-        eq(categoriesTable.storeId, productsTable.storeId),
-      ),
-    )
-    .where(where)
-    .orderBy(...resolveProductOrder(sortBy, sortDir))
-    .limit(limit)
-    .offset(resolvedOffset);
-
-  const [{ count: total }] = await db
-    .select({ count: sql<number>`count(*)::int` })
-    .from(productsTable)
-    .where(where);
-
-  const productIds = rows.map((row) => row.id);
-  const variantCounts =
-    productIds.length > 0
-      ? await db
-          .select({
-            productId: productVariantsTable.productId,
-            variantCount: sql<number>`count(*)::int`,
-            totalStock: sql<number>`coalesce(sum(${productVariantsTable.stock}), 0)::int`,
-          })
-          .from(productVariantsTable)
-          .where(
-            and(
-              eq(productVariantsTable.storeId, storeId),
-              inArray(productVariantsTable.productId, productIds),
-            ),
-          )
-          .groupBy(productVariantsTable.productId)
-      : [];
-
-  const firstImages =
-    productIds.length > 0
-      ? await db
-          .select()
-          .from(productImagesTable)
-          .where(
-            and(
-              eq(productImagesTable.storeId, storeId),
-              inArray(productImagesTable.productId, productIds),
-            ),
-          )
-          .orderBy(
-            asc(productImagesTable.productId),
-            desc(productImagesTable.isPrimary),
-            asc(productImagesTable.position),
-            asc(productImagesTable.createdAt),
-          )
-      : [];
-
-  const countsByProductId = new Map(
-    variantCounts.map((item) => [item.productId, item]),
-  );
-  const firstImageByProductId = new Map<string, ProductImage>();
-
-  for (const image of firstImages) {
-    if (!firstImageByProductId.has(image.productId)) {
-      firstImageByProductId.set(image.productId, image);
+    if (searchTerm) {
+      const pattern = `%${searchTerm}%`;
+      filters.push(
+        or(
+          ilike(productsTable.name, pattern),
+          ilike(productsTable.slug, pattern),
+          ilike(productsTable.sku, pattern),
+          ilike(productsTable.description, pattern),
+        )!,
+      );
     }
-  }
 
-  const products = rows.map((row) => {
-    const { product, category } = splitProductRow(row as Record<string, unknown>);
-    const counts = countsByProductId.get(product.id);
-    return serializeProduct(product, {
-      category,
-      firstImage: firstImageByProductId.get(product.id) ?? null,
-      variantCount: counts?.variantCount ?? 0,
-      totalStock: counts?.totalStock ?? product.totalStock ?? product.stock,
+    if (categoryId) {
+      filters.push(eq(productsTable.categoryId, categoryId));
+    }
+
+    if (status && status !== "all") {
+      filters.push(eq(productsTable.status, status));
+    }
+
+    if (typeof minPrice === "number") {
+      filters.push(gte(productsTable.price, minPrice));
+    }
+
+    if (typeof maxPrice === "number") {
+      filters.push(lte(productsTable.price, maxPrice));
+    }
+
+    if (inStock === true) {
+      filters.push(gte(productsTable.totalStock, 1));
+    }
+
+    if (inStock === false) {
+      filters.push(lte(productsTable.totalStock, 0));
+    }
+
+    const where = and(...filters);
+    const rows = await db
+      .select(productSelect)
+      .from(productsTable)
+      .leftJoin(
+        categoriesTable,
+        and(
+          eq(categoriesTable.id, productsTable.categoryId),
+          eq(categoriesTable.storeId, productsTable.storeId),
+        ),
+      )
+      .where(where)
+      .orderBy(...resolveProductOrder(sortBy, sortDir))
+      .limit(limit)
+      .offset(resolvedOffset);
+
+    const [{ count: total }] = await db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(productsTable)
+      .where(where);
+
+    const productIds = rows.map((row) => row.id);
+    const variantCounts =
+      productIds.length > 0
+        ? await db
+            .select({
+              productId: productVariantsTable.productId,
+              variantCount: sql<number>`count(*)::int`,
+              totalStock: sql<number>`coalesce(sum(${productVariantsTable.stock}), 0)::int`,
+            })
+            .from(productVariantsTable)
+            .where(
+              and(
+                eq(productVariantsTable.storeId, storeId),
+                inArray(productVariantsTable.productId, productIds),
+              ),
+            )
+            .groupBy(productVariantsTable.productId)
+        : [];
+
+    const firstImages =
+      productIds.length > 0
+        ? await db
+            .select()
+            .from(productImagesTable)
+            .where(
+              and(
+                eq(productImagesTable.storeId, storeId),
+                inArray(productImagesTable.productId, productIds),
+              ),
+            )
+            .orderBy(
+              asc(productImagesTable.productId),
+              desc(productImagesTable.isPrimary),
+              asc(productImagesTable.position),
+              asc(productImagesTable.createdAt),
+            )
+        : [];
+
+    const countsByProductId = new Map(
+      variantCounts.map((item) => [item.productId, item]),
+    );
+    const firstImageByProductId = new Map<string, ProductImage>();
+
+    for (const image of firstImages) {
+      if (!firstImageByProductId.has(image.productId)) {
+        firstImageByProductId.set(image.productId, image);
+      }
+    }
+
+    const products = rows.map((row) => {
+      const { product, category } = splitProductRow(row as Record<string, unknown>);
+      const counts = countsByProductId.get(product.id);
+      return serializeProduct(product, {
+        category,
+        firstImage: firstImageByProductId.get(product.id) ?? null,
+        variantCount: counts?.variantCount ?? 0,
+        totalStock: counts?.totalStock ?? product.totalStock ?? product.stock,
+      });
     });
-  });
 
-  res.json({
-    products,
-    total,
-    page,
-    limit,
-    totalPages: total === 0 ? 1 : Math.ceil(total / limit),
-  });
+    res.json({
+      products,
+      total,
+      page,
+      limit,
+      totalPages: total === 0 ? 1 : Math.ceil(total / limit),
+    });
+  } catch (error) {
+    if (!isProductsCompatibilityError(error)) throw error;
+
+    let products = await loadLegacyProductsSnapshot(storeId);
+
+    if (searchTerm) {
+      const normalizedSearch = searchTerm.toLowerCase();
+      products = products.filter((product) =>
+        [product.name, product.slug, product.sku, product.description]
+          .filter(Boolean)
+          .some((value) => value!.toLowerCase().includes(normalizedSearch)),
+      );
+    }
+
+    if (status && status !== "all") {
+      products = products.filter((product) => product.status === status);
+    }
+
+    if (typeof minPrice === "number") {
+      products = products.filter((product) => product.price >= minPrice);
+    }
+
+    if (typeof maxPrice === "number") {
+      products = products.filter((product) => product.price <= maxPrice);
+    }
+
+    if (inStock === true) {
+      products = products.filter((product) => product.stock > 0);
+    }
+
+    if (inStock === false) {
+      products = products.filter((product) => product.stock <= 0);
+    }
+
+    const direction = sortDir === "asc" ? 1 : -1;
+    products.sort((left, right) => {
+      switch (sortBy) {
+        case "name":
+          return left.name.localeCompare(right.name) * direction;
+        case "price":
+          return (left.price - right.price) * direction;
+        case "stock":
+          return (left.stock - right.stock) * direction;
+        case "updatedAt":
+          return (left.updatedAt.getTime() - right.updatedAt.getTime()) * direction;
+        case "oldest":
+          return left.createdAt.getTime() - right.createdAt.getTime();
+        case "newest":
+          return right.createdAt.getTime() - left.createdAt.getTime();
+        case "createdAt":
+        default:
+          return (left.createdAt.getTime() - right.createdAt.getTime()) * direction;
+      }
+    });
+
+    const total = products.length;
+    const pagedProducts = products.slice(resolvedOffset, resolvedOffset + limit);
+    const productIds = pagedProducts.map((product) => product.id);
+    const firstImageByProductId = await loadLegacyFirstImageMap(storeId, productIds);
+    const countsByProductId = await loadLegacyVariantStatsMap(storeId, productIds);
+
+    res.json({
+      products: pagedProducts.map((product) =>
+        serializeLegacyProduct(product, {
+          firstImage: firstImageByProductId.get(product.id) ?? null,
+          variantCount: countsByProductId.get(product.id)?.variantCount ?? 0,
+          totalStock: countsByProductId.get(product.id)?.totalStock ?? product.stock,
+        }),
+      ),
+      total,
+      page,
+      limit,
+      totalPages: total === 0 ? 1 : Math.ceil(total / limit),
+      compatibilityMode: true,
+    });
+  }
 });
 
 router.get("/:id", async (req: TenantRequest, res: Response) => {
   const storeId = req.tenant!.storeId;
   const productId = req.params.id as string;
-  const detail = await loadProductDetail(storeId, productId);
-  if (!detail) {
-    res.status(404).json({ error: "Product not found" });
-    return;
+  try {
+    const detail = await loadProductDetail(storeId, productId);
+    if (!detail) {
+      res.status(404).json({ error: "Product not found" });
+      return;
+    }
+    res.json(detail);
+  } catch (error) {
+    if (!isProductsCompatibilityError(error)) throw error;
+
+    const products = await loadLegacyProductsSnapshot(storeId);
+    const product = products.find((item) => item.id === productId);
+    if (!product) {
+      res.status(404).json({ error: "Product not found" });
+      return;
+    }
+
+    let images: ReturnType<typeof serializeImage>[] = [];
+    try {
+      const imageRows = await db
+        .select()
+        .from(productImagesTable)
+        .where(
+          and(
+            eq(productImagesTable.productId, productId),
+            eq(productImagesTable.storeId, storeId),
+          ),
+        )
+        .orderBy(asc(productImagesTable.position), asc(productImagesTable.createdAt));
+      images = imageRows.map(serializeImage);
+    } catch (imageError) {
+      if (!isProductsCompatibilityError(imageError)) throw imageError;
+      images = normalizeLegacyImageUrls(product.images).map((url, index) => ({
+        id: `legacy-${product.id}-${index}`,
+        storeId: product.storeId,
+        productId: product.id,
+        variantId: null,
+        url,
+        altText: null,
+        alt: null,
+        position: index,
+        sortOrder: index,
+        isPrimary: index === 0,
+        createdAt: product.createdAt,
+        updatedAt: product.updatedAt,
+      }));
+    }
+
+    res.json({
+      product: serializeLegacyProduct(product, {
+        firstImage: null,
+        variantCount: 0,
+        totalStock: product.stock,
+      }),
+      variants: [],
+      images,
+      category: null,
+      compatibilityMode: true,
+    });
   }
-  res.json(detail);
 });
 
 router.post("/", async (req: TenantRequest, res: Response) => {
@@ -1530,13 +1875,18 @@ router.delete("/:id/images/:imageId", async (req: TenantRequest, res: Response) 
 
 categoriesRouter.get("/", async (req: TenantRequest, res: Response) => {
   const storeId = req.tenant!.storeId;
-  const categories = await db
-    .select()
-    .from(categoriesTable)
-    .where(eq(categoriesTable.storeId, storeId))
-    .orderBy(asc(categoriesTable.position), asc(categoriesTable.name));
+  try {
+    const categories = await db
+      .select()
+      .from(categoriesTable)
+      .where(eq(categoriesTable.storeId, storeId))
+      .orderBy(asc(categoriesTable.position), asc(categoriesTable.name));
 
-  res.json({ categories: buildCategoryTree(categories) });
+    res.json({ categories: buildCategoryTree(categories) });
+  } catch (error) {
+    if (!isProductsCompatibilityError(error)) throw error;
+    res.json({ categories: [], compatibilityMode: true });
+  }
 });
 
 categoriesRouter.post("/", async (req: TenantRequest, res: Response) => {

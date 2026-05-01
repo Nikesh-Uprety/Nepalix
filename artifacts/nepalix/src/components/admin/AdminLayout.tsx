@@ -44,6 +44,7 @@ type NavItem = {
 
 const STORE_ITEMS: NavItem[] = [
   { to: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard, page: "dashboard" },
+  { to: "/admin/products", label: "Products", icon: Package, page: "products" },
   { to: "/admin/orders", label: "Orders", icon: Package, page: "orders", badge: "18" },
   { to: "/admin/pos", label: "Point of Sale", icon: MonitorSmartphone, page: "pos" },
   { to: "/admin/inventory", label: "Inventory", icon: Boxes, page: "inventory" },
