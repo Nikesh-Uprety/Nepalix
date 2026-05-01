@@ -39,7 +39,7 @@ export function toAuthUserResponse(user: User) {
     createdAt: user.createdAt,
   };
 }
-import { and, desc, eq, isNull } from "drizzle-orm";
+import { and, desc, eq, isNull, sql } from "drizzle-orm";
 import { authMiddleware, type AuthRequest } from "../middlewares/auth.js";
 import { createTrialSubscription } from "./subscriptions.js";
 import { logger } from "../lib/logger.js";
@@ -188,7 +188,7 @@ logger.info({ email: normalizedEmail }, "Auto-creating verified user");
           passwordHash,
           firstName,
           lastName,
-          role: "user",
+          role: "owner",
         })
         .returning();
 
@@ -345,7 +345,7 @@ const [user] = await db
       passwordHash: verification.passwordHash,
       firstName: verification.firstName,
       lastName: verification.lastName,
-      role: "user",
+      role: "owner",
     })
     .returning();
 
@@ -407,6 +407,46 @@ const onboardingSchema = z.object({
   primaryProductImageUrl: z.string().url(),
   extraProductImageUrls: z.array(z.string().url()).max(8).default([]),
 });
+
+type SeedProductRow = {
+  id: string;
+  storeId: string;
+  name: string;
+  slug: string | null;
+  status: string;
+  isActive: boolean;
+};
+
+async function createOnboardingSeedProduct(input: {
+  storeId: string;
+  primaryProductName: string;
+  storeName: string;
+  imageUrls: string[];
+}): Promise<SeedProductRow | null> {
+  const productSlug = toSlug(input.primaryProductName);
+  const description = `${input.primaryProductName} by ${input.storeName}`;
+
+  const result = await db.execute(sql<SeedProductRow>`
+    insert into "products"
+      ("store_id", "name", "slug", "description", "price", "currency", "stock", "images", "status", "is_active")
+    values
+      (
+        ${input.storeId},
+        ${input.primaryProductName},
+        ${productSlug},
+        ${description},
+        ${0},
+        ${"NPR"},
+        ${100},
+        ${JSON.stringify(input.imageUrls)}::jsonb,
+        ${"active"},
+        ${true}
+      )
+    returning "id", "store_id" as "storeId", "name", "slug", "status", "is_active" as "isActive"
+  `);
+
+  return (result.rows[0] as SeedProductRow | undefined) ?? null;
+}
 
 router.post("/onboarding/complete", authMiddleware, async (req: AuthRequest, res: Response) => {
   const parsed = onboardingSchema.safeParse(req.body);
@@ -523,22 +563,19 @@ router.post("/onboarding/complete", authMiddleware, async (req: AuthRequest, res
     await db.insert(storeSettingsTable).values(settingsPayload);
   }
 
-  const [product] = await db
-    .insert(productsTable)
-    .values({
-      storeId,
-      name: primaryProductName,
-      slug: toSlug(primaryProductName),
-      description: `${primaryProductName} by ${storeName}`,
-      price: 0,
-      currency: "NPR",
-      stock: 100,
-      status: "active",
-      isActive: true,
-    })
-    .returning();
-
   const imageUrls = [primaryProductImageUrl, ...extraProductImageUrls].slice(0, 9);
+  const product = await createOnboardingSeedProduct({
+    storeId,
+    primaryProductName,
+    storeName,
+    imageUrls,
+  });
+
+  if (!product) {
+    res.status(500).json({ error: "Could not create starter product" });
+    return;
+  }
+
   if (imageUrls.length > 0) {
     await db.insert(productImagesTable).values(
       imageUrls.map((url, idx) => ({
@@ -616,6 +653,7 @@ router.post("/onboarding/complete", authMiddleware, async (req: AuthRequest, res
   const [updatedUser] = await db
     .update(usersTable)
     .set({
+      role: "owner",
       onboardingCompletedAt: new Date(),
       updatedAt: new Date(),
     })

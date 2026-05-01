@@ -71,6 +71,7 @@ export async function provisionStoreForUser(args: {
     const updateResult = await db
       .update(usersTable)
       .set({
+        role: "owner",
         storeId: store.id,
         activeStoreId: store.id,
         updatedAt: new Date(),

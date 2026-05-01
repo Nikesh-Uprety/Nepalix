@@ -11,7 +11,9 @@ export function getAdminHomeRoute(user: AuthUser | null | undefined) {
 export function getAuthenticatedHomeRoute(user: AuthUser | null | undefined) {
   if (!user) return "/";
   if (isSuperAdminRole(user.role)) return "/admin/platform";
-  if (!user.onboardingCompletedAt) return "/onboarding";
+  const isFreshUser =
+    !user.onboardingCompletedAt && !user.storeId && !user.activeStoreId;
+  if (isFreshUser) return "/onboarding";
   if (user.canAccessAdmin) return "/admin/dashboard";
   return "/billing";
 }

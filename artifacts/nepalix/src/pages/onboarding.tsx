@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useLocation } from "wouter";
 import { motion } from "framer-motion";
 import {
@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { api } from "@/lib/api";
+import { getAuthenticatedHomeRoute } from "@/lib/portal-routing";
 
 type Step = 0 | 1 | 2 | 3;
 
@@ -68,6 +69,14 @@ export default function OnboardingPage() {
     () => (storeCategory === "Other" ? otherCategory.trim() || "General" : storeCategory),
     [otherCategory, storeCategory],
   );
+
+  useEffect(() => {
+    if (!user) return;
+    const isFreshUser = !user.onboardingCompletedAt && !user.storeId && !user.activeStoreId;
+    if (!isFreshUser) {
+      setLocation(getAuthenticatedHomeRoute(user), { replace: true });
+    }
+  }, [setLocation, user]);
 
   const theme = {
     page: "from-[#FFF8E7] via-[#F9F3E8] to-[#FFF8E7]",
@@ -136,7 +145,7 @@ export default function OnboardingPage() {
     setError("");
     setProcessing(true);
     try {
-      await completeOnboarding({
+      const result = await completeOnboarding({
         storeName: storeName.trim(),
         storeCategory: effectiveCategory.trim(),
         location: locationName.trim(),
@@ -147,7 +156,7 @@ export default function OnboardingPage() {
       });
       setDone(true);
       setTimeout(() => {
-        setLocation("/billing?from=onboarding");
+        setLocation(getAuthenticatedHomeRoute(result.user), { replace: true });
       }, 1000);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Could not finish onboarding");
@@ -326,4 +335,3 @@ export default function OnboardingPage() {
     </div>
   );
 }
-
